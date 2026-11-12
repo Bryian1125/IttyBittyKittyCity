@@ -1,0 +1,6 @@
+# Vendored upstream agent skills — formatted by their own repositories.
+agents/skills/
+
+# Build output
+dist/
+.svelte-kit/
