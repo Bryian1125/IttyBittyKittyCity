@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { useTask, useThrelte } from '@threlte/core';
 	import type { Object3D } from 'three';
-	import { cameraYaw } from '../state/camera.svelte';
+	// Registers the Q/E key listeners on window as an import side effect.
+	import '../lib/cameraInput';
+	import { getCameraYaw } from '../state/camera.svelte';
 	import { FollowCameraSystem } from '../engine/FollowCameraSystem';
 
 	let { target }: { target: Object3D } = $props();
@@ -21,6 +23,6 @@
 	});
 
 	useTask((delta) => {
-		system.update(delta, camera.current, target.position, cameraYaw);
+		system.update(delta, camera.current, target.position, getCameraYaw());
 	});
 </script>
