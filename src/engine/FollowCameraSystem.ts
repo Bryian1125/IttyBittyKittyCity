@@ -4,7 +4,7 @@ const OFFSET = new Vector3(0, 20, 16);
 const UP = new Vector3(0, 1, 0);
 const ORIGIN = new Vector3();
 const FOLLOW_SPEED = 3.5;
-const ROTATION_SPEED = 10;
+const ROTATION_SPEED = 3.5;
 const FOV = 35;
 
 const ZOOM_MAX = 1; // current distance is the farthest the camera may get
