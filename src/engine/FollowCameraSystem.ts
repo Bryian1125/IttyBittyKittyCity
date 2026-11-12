@@ -26,7 +26,7 @@ export class FollowCameraSystem {
 
 	zoom(delta: number): void {
 		const next = this.zoomFactor + delta * ZOOM_SENSITIVITY;
-		this.zoomFactor = Math.min(ZOOM_MIN, Math.max(ZOOM_MAX, next));
+		this.zoomFactor = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
 	}
 
 	update(delta: number, camera: Camera, target: Vector3): void {
