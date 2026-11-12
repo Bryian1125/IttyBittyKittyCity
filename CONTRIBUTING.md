@@ -103,10 +103,11 @@ example, ignoring unknown keys in `input.ts` rather than throwing) is fine.
 ### Vendored and generated code
 
 Do not patch code under `node_modules/`, and do not hand-edit `dist/` output —
-both are regenerated and any local edits are lost. The same applies to
-`agents/skills/`: it is a vendored copy of upstream agent skills. Report or fix
-issues upstream (or re-copy the skill from its source, listed in
-`agents/skills/SOURCES.md`) instead of editing the files here.
+both are regenerated and any local edits are lost. That rule covers vendored
+third-party content generally, including the agent skill set under
+`agents/skills/` (dev branch, sources in `agents/skills/SOURCES.md`): fix or
+report issues upstream, or re-copy from the source, instead of editing the
+files in place.
 
 ## Testing
 
