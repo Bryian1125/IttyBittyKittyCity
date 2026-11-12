@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
-	import type { Object3D } from 'three';
+	import type { Mesh } from 'three';
 	import { PlayerController } from '../engine/PlayerController';
 	import { readMovement } from '../lib/input';
 
-	let { object = $bindable(undefined) } = $props<{ object?: Object3D }>();
+	let { object = $bindable() }: { object?: Mesh } = $props();
 
 	let controller: PlayerController | undefined;
 
