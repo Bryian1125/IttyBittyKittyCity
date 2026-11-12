@@ -71,24 +71,24 @@ src/
 
 ## Controls
 
-| Key | Action |
-|-----|--------|
-| `W` / `↑` | Move forward |
+| Key       | Action        |
+| --------- | ------------- |
+| `W` / `↑` | Move forward  |
 | `S` / `↓` | Move backward |
-| `A` / `←` | Move left |
-| `D` / `→` | Move right |
+| `A` / `←` | Move left     |
+| `D` / `→` | Move right    |
 
 ## Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run check` | Run `svelte-check` (TypeScript + Svelte diagnostics) |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format with Prettier |
-| `npm run test` | Run Vitest tests |
+| Command           | Description                                          |
+| ----------------- | ---------------------------------------------------- |
+| `npm run dev`     | Start development server                             |
+| `npm run build`   | Build for production                                 |
+| `npm run preview` | Preview production build                             |
+| `npm run check`   | Run `svelte-check` (TypeScript + Svelte diagnostics) |
+| `npm run lint`    | Run ESLint                                           |
+| `npm run format`  | Format with Prettier                                 |
+| `npm run test`    | Run Vitest tests                                     |
 
 ## Contributing
 
