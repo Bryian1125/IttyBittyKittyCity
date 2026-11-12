@@ -6,7 +6,7 @@ import globals from 'globals';
 
 export default tseslint.config(
 	{
-		ignores: ['dist/', 'node_modules/', '.svelte-kit/'],
+		ignores: ['dist/', 'node_modules/', '.svelte-kit/', 'agents/'],
 	},
 	eslint.configs.recommended,
 	...tseslint.configs.recommended,
