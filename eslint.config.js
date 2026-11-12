@@ -6,7 +6,8 @@ import globals from 'globals';
 
 export default tseslint.config(
 	{
-		ignores: ['dist/', 'node_modules/', '.svelte-kit/'],
+		// agents/skills/ holds vendored upstream skill examples — not our code.
+		ignores: ['dist/', 'node_modules/', '.svelte-kit/', 'agents/skills/'],
 	},
 	eslint.configs.recommended,
 	...tseslint.configs.recommended,

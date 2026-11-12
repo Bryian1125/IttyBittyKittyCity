@@ -92,7 +92,9 @@ src/
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, testing policy, and
+commit conventions. [ARCHITECTURE.md](ARCHITECTURE.md) covers the layer
+boundaries, naming, and the rules the frame loop follows.
 
 ## License
 
