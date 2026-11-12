@@ -8,6 +8,8 @@
 	const { camera } = useThrelte();
 	const system = new FollowCameraSystem();
 
+	system.initialize(camera.current);
+
 	useTask((delta) => {
 		system.update(delta, camera.current, target.position);
 	});
