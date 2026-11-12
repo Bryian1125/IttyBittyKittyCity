@@ -1,34 +1,14 @@
-export type CameraAction = 'rotateLeft' | 'rotateRight';
+import { rotateCamera } from '../state/camera.svelte';
 
-export interface CameraInputState {
-	rotateLeft: boolean;
-	rotateRight: boolean;
-}
-
-const bindings: Record<string, CameraAction> = {
-	KeyE: 'rotateRight',
-	KeyQ: 'rotateLeft',
-};
-
-const state: CameraInputState = {
-	rotateLeft: false,
-	rotateRight: false,
+const steps: Record<string, number> = {
+	KeyE: 1,
+	KeyQ: -1,
 };
 
 if (typeof window !== 'undefined') {
 	window.addEventListener('keydown', (event) => {
-		const action = bindings[event.code];
-		if (action === undefined || event.repeat) return;
-		state[action] = true;
+		const direction = steps[event.code];
+		if (direction === undefined || event.repeat) return;
+		rotateCamera(direction);
 	});
-
-	window.addEventListener('keyup', (event) => {
-		const action = bindings[event.code];
-		if (action === undefined) return;
-		state[action] = false;
-	});
-}
-
-export function readCameraInput(): CameraInputState {
-	return { ...state };
 }
