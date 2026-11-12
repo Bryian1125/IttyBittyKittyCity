@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import type { Mesh } from 'three';
+	import { getCameraYaw } from '../state/camera.svelte';
 	import { CollisionSystem } from '../engine/CollisionSystem';
 	import { PlayerController } from '../engine/PlayerController';
 	import { readMovement } from '../lib/input';
@@ -13,7 +14,7 @@
 	useTask((delta) => {
 		if (object === undefined) return;
 		controller ??= new PlayerController(object, collision);
-		controller.update(delta, readMovement());
+		controller.update(delta, readMovement(), getCameraYaw());
 	});
 </script>
 
