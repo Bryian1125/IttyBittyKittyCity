@@ -1,4 +1,5 @@
 import type { Object3D } from 'three';
+import { CollisionSystem } from './CollisionSystem';
 
 export interface MovementInput {
 	forward: boolean;
@@ -10,6 +11,7 @@ export interface MovementInput {
 export class PlayerController {
 	constructor(
 		private readonly target: Object3D,
+		private readonly collision: CollisionSystem,
 		private readonly speed = 5,
 	) {}
 
@@ -19,7 +21,16 @@ export class PlayerController {
 		if (x === 0 && z === 0) return;
 
 		const length = Math.hypot(x, z);
-		this.target.position.x += (x / length) * this.speed * delta;
-		this.target.position.z += (z / length) * this.speed * delta;
+		this.moveAxis('x', (x / length) * this.speed * delta);
+		this.moveAxis('z', (z / length) * this.speed * delta);
+	}
+
+	private moveAxis(axis: 'x' | 'z', step: number): void {
+		if (step === 0) return;
+
+		this.target.position[axis] += step;
+		if (this.collision.intersects(this.target.position)) {
+			this.target.position[axis] -= step;
+		}
 	}
 }

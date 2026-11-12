@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import type { Mesh } from 'three';
+	import { CollisionSystem } from '../engine/CollisionSystem';
 	import { PlayerController } from '../engine/PlayerController';
 	import { readMovement } from '../lib/input';
 
 	let { object = $bindable() }: { object?: Mesh } = $props();
 
+	const collision = new CollisionSystem();
 	let controller: PlayerController | undefined;
 
 	useTask((delta) => {
 		if (object === undefined) return;
-		controller ??= new PlayerController(object);
+		controller ??= new PlayerController(object, collision);
 		controller.update(delta, readMovement());
 	});
 </script>
