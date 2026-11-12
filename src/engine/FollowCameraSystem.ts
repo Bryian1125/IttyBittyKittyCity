@@ -4,8 +4,9 @@ const OFFSET = new Vector3(0, 20, 16);
 const UP = new Vector3(0, 1, 0);
 const ORIGIN = new Vector3();
 const FOLLOW_SPEED = 3.5;
-const ROTATION_SPEED = 3.5;
 const FOV = 35;
+const ROTATION_DURATION = 0.75;
+const SETTLE_ANGLE = 0.001;
 
 const ZOOM_MAX = 1; // current distance is the farthest the camera may get
 const ZOOM_MIN = 1 / 1.5; // 150% zoom in from current = closest allowed distance
@@ -19,6 +20,8 @@ export class FollowCameraSystem {
 	private readonly targetRotation = new Quaternion();
 	private zoomFactor = ZOOM_MAX;
 	private appliedYaw: number | null = null;
+	private rotationActive = true;
+	private rotationTimer = 0;
 
 	initialize(camera: Camera): void {
 		if (camera instanceof PerspectiveCamera) {
@@ -40,12 +43,23 @@ export class FollowCameraSystem {
 			this.lookMatrix.lookAt(this.offsetDirection, ORIGIN, UP);
 			this.targetRotation.setFromRotationMatrix(this.lookMatrix);
 			this.appliedYaw = yaw;
+			this.rotationActive = true;
+			this.rotationTimer = ROTATION_DURATION;
 		}
 
-		// Orientation snapping never re-runs unless yaw changed, so during
-		// normal movement the quaternion stays exactly put.
-		const rotationSmoothing = 1 - Math.exp(-ROTATION_SPEED * delta);
-		camera.quaternion.slerp(this.targetRotation, rotationSmoothing);
+		// While a rotation is in flight the camera aims at the player from its
+		// actual mid-swing position, so the player stays framed through the
+		// turn. At rest the quaternion is untouched, so movement can never
+		// angle the view.
+		if (this.rotationActive) {
+			camera.lookAt(target);
+			this.rotationTimer -= delta;
+
+			if (this.rotationTimer <= 0 || camera.quaternion.angleTo(this.targetRotation) < SETTLE_ANGLE) {
+				camera.quaternion.copy(this.targetRotation);
+				this.rotationActive = false;
+			}
+		}
 
 		this.desiredOffset.copy(this.offsetDirection).multiplyScalar(this.zoomFactor);
 		this.desiredPosition.copy(target).add(this.desiredOffset);
