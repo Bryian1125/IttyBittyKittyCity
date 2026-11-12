@@ -10,6 +10,15 @@
 
 	system.initialize(camera.current);
 
+	function onWheel(event: WheelEvent): void {
+		system.zoom(event.deltaY);
+	}
+
+	$effect(() => {
+		window.addEventListener('wheel', onWheel, { passive: true });
+		return () => window.removeEventListener('wheel', onWheel);
+	});
+
 	useTask((delta) => {
 		system.update(delta, camera.current, target.position);
 	});
