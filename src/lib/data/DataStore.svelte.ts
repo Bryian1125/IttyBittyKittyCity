@@ -18,6 +18,7 @@ export class DataStore<T extends object> {
 	}
 
 	patch(partial: Partial<T>): void {
+		if (this.data === undefined) return;
 		Object.assign(this.data, partial);
 	}
 
