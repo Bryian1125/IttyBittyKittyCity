@@ -3,15 +3,15 @@
 	import type { Object3D } from 'three';
 	// Registers the Q/E key listeners on window as an import side effect.
 	import '../lib/cameraInput';
-	import { getCameraYaw } from '../state/camera.svelte';
+	import { camera } from '../state/camera.svelte';
 	import { FollowCameraSystem } from '../engine/FollowCameraSystem';
 
 	let { target }: { target: Object3D } = $props();
 
-	const { camera } = useThrelte();
-	const system = new FollowCameraSystem();
+	const { camera: sceneCamera } = useThrelte();
+	const system = new FollowCameraSystem(camera);
 
-	system.initialize(camera.current);
+	system.initialize(sceneCamera.current);
 
 	function onWheel(event: WheelEvent): void {
 		system.zoom(event.deltaY);
@@ -23,6 +23,6 @@
 	});
 
 	useTask((delta) => {
-		system.update(delta, camera.current, target.position, getCameraYaw());
+		system.update(delta, sceneCamera.current, target.position);
 	});
 </script>
