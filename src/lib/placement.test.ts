@@ -4,9 +4,12 @@ import { sites, type MapSiteType } from './layout';
 import {
 	getFootprint,
 	getPlacementProblem,
+	nextRotation,
+	rotateFootprint,
 	toCell,
 	type Cell,
 	type PlacedBuilding,
+	type Rotation,
 } from './placement';
 
 function makeDef(footprint: [number, number], site?: MapSiteType): BuildingDef {
@@ -21,8 +24,12 @@ function makeDef(footprint: [number, number], site?: MapSiteType): BuildingDef {
 	};
 }
 
-function makePlaced(footprint: [number, number], anchor: Cell): PlacedBuilding {
-	return { id: 1, def: makeDef(footprint), anchor };
+function makePlaced(
+	footprint: [number, number],
+	anchor: Cell,
+	rotation: Rotation = 0,
+): PlacedBuilding {
+	return { id: 1, def: makeDef(footprint), anchor, rotation };
 }
 
 const mineralsSite = sites[0];
@@ -52,6 +59,26 @@ describe('getFootprint', () => {
 			minRow: 3,
 			maxRow: 7,
 		});
+	});
+});
+
+describe('rotateFootprint', () => {
+	it('keeps the authored footprint on even quarter turns', () => {
+		expect(rotateFootprint([2, 5], 0)).toEqual([2, 5]);
+		expect(rotateFootprint([2, 5], 2)).toEqual([2, 5]);
+	});
+
+	it('swaps the axes on odd quarter turns', () => {
+		expect(rotateFootprint([2, 5], 1)).toEqual([5, 2]);
+		expect(rotateFootprint([2, 5], 3)).toEqual([5, 2]);
+	});
+});
+
+describe('nextRotation', () => {
+	it('advances clockwise and wraps back to 0', () => {
+		expect([0, 1, 2, 3].map((r) => nextRotation(r as Rotation))).toEqual([
+			1, 2, 3, 0,
+		]);
 	});
 });
 
@@ -154,6 +181,28 @@ describe('getPlacementProblem', () => {
 		).toBe('occupied');
 		expect(
 			getPlacementProblem(makeDef([2, 2]), { column: 2, row: 0 }, existing),
+		).toBeNull();
+	});
+
+	it('tests the candidate against its rotated footprint', () => {
+		// 40 cells fit across the buildable area but not down it, so the same
+		// shape is legal at one orientation and out of bounds a quarter turn on.
+		const anchor = { column: BUILD_BOUNDS.minColumn, row: 0 };
+		expect(getPlacementProblem(makeDef([40, 2]), anchor, [])).toBeNull();
+		expect(
+			getPlacementProblem(makeDef([40, 2]), anchor, [], undefined, 1),
+		).toBe('out-of-bounds');
+	});
+
+	it('blocks against a rotated placed building\u2019s real rectangle', () => {
+		// [2, 5] turned a quarter turn occupies columns 0-4, rows 0-1.
+		const existing = [makePlaced([2, 5], { column: 0, row: 0 }, 1)];
+
+		expect(
+			getPlacementProblem(makeDef([1, 1]), { column: 4, row: 1 }, existing),
+		).toBe('occupied');
+		expect(
+			getPlacementProblem(makeDef([1, 1]), { column: 5, row: 0 }, existing),
 		).toBeNull();
 	});
 });

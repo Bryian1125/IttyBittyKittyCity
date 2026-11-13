@@ -7,14 +7,21 @@
 -->
 <script lang="ts">
 	import type { BuildingDef } from '../lib/balance';
-	import type { Cell } from '../lib/placement';
+	import type { Cell, Rotation } from '../lib/placement';
 	import BuildingModel from './BuildingModel.svelte';
 
 	let {
 		def,
 		anchor,
+		rotation = 0,
 		blocked = false,
-	}: { def: BuildingDef; anchor: Cell; blocked?: boolean } = $props();
+	}: {
+		def: BuildingDef;
+		anchor: Cell;
+		/** Quarter turns clockwise from the def's authored orientation. */
+		rotation?: Rotation;
+		blocked?: boolean;
+	} = $props();
 
 	const GHOST_OPACITY = 0.55;
 	const VALID_COLOR = '#2ecc71';
@@ -25,5 +32,5 @@
 
 <!-- Keyed on the def so switching the picker reloads the right model. -->
 {#key def.id}
-	<BuildingModel {def} {anchor} tint={color} opacity={GHOST_OPACITY} />
+	<BuildingModel {def} {anchor} {rotation} tint={color} opacity={GHOST_OPACITY} />
 {/key}

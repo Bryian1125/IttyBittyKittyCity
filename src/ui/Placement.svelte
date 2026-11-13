@@ -2,18 +2,19 @@
 	@component
 	Build-mode placement: a ghost structure follows the pointer — green when
 	placing succeeds, red when blocked — and a click charges the cost and
-	commits it. Esc leaves build mode.
+	commits it. R turns the structure a quarter turn. Esc leaves build mode.
 -->
 <script lang="ts">
 	import { useTask, useThrelte } from '@threlte/core';
 	import { Plane, Raycaster, Vector2, Vector3, type Mesh } from 'three';
 	import type { CollisionSystem } from '../engine/CollisionSystem';
 	import { BUILDING_HEIGHT } from '../lib/balance';
-	import { getBuildingCenter, toCell, type Cell } from '../lib/placement';
+	import { getBuildingCenter, rotateFootprint, toCell, type Cell } from '../lib/placement';
 	import {
 		buildingsState,
 		confirmPlacement,
 		getPlacementProblemAt,
+		rotatePlacement,
 		setPlacementCursor,
 		stopPlacing,
 	} from '../state/buildings.svelte';
@@ -77,23 +78,41 @@
 		const placed = confirmPlacement(anchor, playerCell);
 		if (placed === null) return;
 
+		const footprint = rotateFootprint(placed.def.footprint, placed.rotation);
 		collision.addBox({
-			position: getBuildingCenter(placed.anchor, placed.def.footprint),
-			size: [placed.def.footprint[0], BUILDING_HEIGHT, placed.def.footprint[1]],
+			position: getBuildingCenter(placed.anchor, footprint),
+			size: [footprint[0], BUILDING_HEIGHT, footprint[1]],
 		});
 	}
 
 	function handleKeydown(event: KeyboardEvent): void {
 		if (event.key === 'Escape') stopPlacing();
+
+		// Physical key, like the movement and camera bindings: R must not depend
+		// on the layout. Ignore auto-repeat and leave Ctrl/Cmd+R to the browser.
+		if (
+			event.code === 'KeyR' &&
+			!event.repeat &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			buildingsState.selected !== undefined
+		) {
+			rotatePlacement();
+		}
 	}
 </script>
 
 {#if selected !== undefined && cursor !== undefined}
-	<BuildingGhost def={selected} anchor={cursor} blocked={ghostProblem !== null} />
+	<BuildingGhost
+		def={selected}
+		anchor={cursor}
+		rotation={buildingsState.rotation}
+		blocked={ghostProblem !== null}
+	/>
 {/if}
 
 {#each buildingsState.placed as building (building.id)}
-	<BuildingModel def={building.def} anchor={building.anchor} />
+	<BuildingModel def={building.def} anchor={building.anchor} rotation={building.rotation} />
 {/each}
 
 <svelte:window onpointermove={handlePointerMove} onclick={handleClick} onkeydown={handleKeydown} />

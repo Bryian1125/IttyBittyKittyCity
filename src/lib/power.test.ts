@@ -16,7 +16,7 @@ function makeBuilding(
 		cost: {},
 		power: { draw, generate },
 	};
-	return { id, def, anchor: { column: 0, row: 0 } };
+	return { id, def, anchor: { column: 0, row: 0 }, rotation: 0 };
 }
 
 describe('computePower', () => {

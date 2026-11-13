@@ -1,30 +1,41 @@
 import type { BuildingDef, ResourceId } from '../lib/balance';
 import {
 	getPlacementProblem,
+	nextRotation,
 	type Cell,
 	type PlacedBuilding,
 	type PlacementProblem,
+	type Rotation,
 } from '../lib/placement';
 import { canAfford, spendResource } from './resources.svelte';
 
 type BuildingsState = {
 	selected?: BuildingDef;
 	cursor?: Cell;
+	/** Quarter turns applied to the structure being placed. */
+	rotation: Rotation;
 	placed: PlacedBuilding[];
 };
 
-export const buildingsState = $state<BuildingsState>({ placed: [] });
+export const buildingsState = $state<BuildingsState>({ rotation: 0, placed: [] });
 
 let nextId = 1;
 
 export function startPlacing(def: BuildingDef): void {
 	buildingsState.selected = def;
 	buildingsState.cursor = undefined;
+	buildingsState.rotation = 0;
 }
 
 export function stopPlacing(): void {
 	buildingsState.selected = undefined;
 	buildingsState.cursor = undefined;
+	buildingsState.rotation = 0;
+}
+
+/** Turns the structure being placed one quarter turn clockwise. */
+export function rotatePlacement(): void {
+	buildingsState.rotation = nextRotation(buildingsState.rotation);
 }
 
 export function setPlacementCursor(cursor: Cell | undefined): void {
@@ -47,6 +58,7 @@ export function getPlacementProblemAt(
 		anchor,
 		buildingsState.placed,
 		playerCell,
+		buildingsState.rotation,
 	);
 	if (problem !== null) return problem;
 
@@ -67,7 +79,12 @@ export function confirmPlacement(
 		if (amount !== undefined) spendResource(id, amount);
 	}
 
-	const building: PlacedBuilding = { id: nextId, def, anchor };
+	const building: PlacedBuilding = {
+		id: nextId,
+		def,
+		anchor,
+		rotation: buildingsState.rotation,
+	};
 	nextId += 1;
 	buildingsState.placed.push(building);
 	return building;

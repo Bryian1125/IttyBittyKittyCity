@@ -14,10 +14,28 @@ export type PlacedBuilding = {
 	id: number;
 	def: BuildingDef;
 	anchor: Cell;
+	/** Quarter turns clockwise from the def's authored footprint. */
+	rotation: Rotation;
 };
 
 export type PlacementProblem =
 	'out-of-bounds' | 'occupied' | 'off-site' | 'unaffordable';
+
+/** Quarter turns clockwise; 0 is the def's authored orientation. */
+export type Rotation = 0 | 1 | 2 | 3;
+
+/** Footprint [width, depth] after `rotation` quarter turns; odd turns swap the axes. */
+export function rotateFootprint(
+	footprint: [number, number],
+	rotation: Rotation,
+): [number, number] {
+	return rotation % 2 === 0 ? footprint : [footprint[1], footprint[0]];
+}
+
+/** The next quarter turn clockwise, wrapping back to 0. */
+export function nextRotation(rotation: Rotation): Rotation {
+	return ((rotation + 1) % 4) as Rotation;
+}
 
 type FootprintSource = {
 	position: [number, number, number];
@@ -99,14 +117,17 @@ const siteFootprints = sites.map((site) => ({
  * null when the structure fits at the anchor; otherwise the blocking problem.
  * A site-typed structure must cover a matching collection point; other
  * structures may not cover any, and the player's own cell always blocks.
+ * `rotation` is the in-flight quarter turn applied to the candidate; already
+ * placed structures are tested against their own stored rotation.
  */
 export function getPlacementProblem(
 	def: BuildingDef,
 	anchor: Cell,
 	placedBuildings: PlacedBuilding[],
 	playerCell?: Cell,
+	rotation: Rotation = 0,
 ): PlacementProblem | null {
-	const rect = getFootprint(anchor, def.footprint);
+	const rect = getFootprint(anchor, rotateFootprint(def.footprint, rotation));
 	if (
 		rect.minColumn < BUILD_BOUNDS.minColumn ||
 		rect.maxColumn > BUILD_BOUNDS.maxColumn ||
@@ -121,7 +142,13 @@ export function getPlacementProblem(
 
 	if (
 		placedBuildings.some((building) =>
-			rectsOverlap(rect, getFootprint(building.anchor, building.def.footprint)),
+			rectsOverlap(
+				rect,
+				getFootprint(
+					building.anchor,
+					rotateFootprint(building.def.footprint, building.rotation),
+				),
+			),
 		)
 	) {
 		return 'occupied';
