@@ -27,6 +27,8 @@ src/
     Player.svelte         Player mesh + per-frame task
     Environment.svelte    Floor, walls, crates, lights
     Placement.svelte      Build-mode ghost preview + click-to-place
+    BuildingGhost.svelte  Green/red placement ghost for any building
+    BuildingModel.svelte  Placed building: glTF model when the def has one, box otherwise
     BuildMenu.svelte      Bottom-right build button and building picker
     ResourceHud.svelte    Bottom-left resource and power counters
     FollowCamera.svelte   Camera rig + wheel zoom listener
@@ -48,6 +50,15 @@ src/
     resources.svelte.ts   Resource pools and spend checks
     buildings.svelte.ts   Placed buildings and placement selection
 ```
+
+## Assets
+
+Third-party 3D assets live under `public/models/<pack>/` and are referenced by
+public URL from `BuildingDef.model` (for example
+`/models/kaykit/drill_structure.gltf`). Keep a pack's `.gltf`, `.bin`, texture
+files, and license text in the same folder so the relative texture URIs resolve
+and the license travels with the files. Provenance and attribution are recorded
+in [CREDITS.md](CREDITS.md).
 
 ## Boundaries reviewers enforce
 

@@ -5,7 +5,7 @@
 	commits it. Esc leaves build mode.
 -->
 <script lang="ts">
-	import { T, useThrelte } from '@threlte/core';
+	import { useThrelte } from '@threlte/core';
 	import { Plane, Raycaster, Vector2, Vector3 } from 'three';
 	import type { CollisionSystem } from '../engine/CollisionSystem';
 	import { BUILDING_HEIGHT } from '../lib/balance';
@@ -17,6 +17,8 @@
 		setPlacementCursor,
 		stopPlacing,
 	} from '../state/buildings.svelte';
+	import BuildingGhost from './BuildingGhost.svelte';
+	import BuildingModel from './BuildingModel.svelte';
 
 	let { collision }: { collision: CollisionSystem } = $props();
 
@@ -69,22 +71,11 @@
 </script>
 
 {#if selected !== undefined && cursor !== undefined}
-	<T.Mesh position={getBuildingCenter(cursor, selected.footprint)}>
-		<T.BoxGeometry args={[selected.footprint[0], BUILDING_HEIGHT, selected.footprint[1]]} />
-		<T.MeshStandardMaterial
-			color={ghostProblem === null ? '#2ecc71' : '#e74c3c'}
-			transparent
-			opacity={0.55}
-			depthWrite={false}
-		/>
-	</T.Mesh>
+	<BuildingGhost def={selected} anchor={cursor} blocked={ghostProblem !== null} />
 {/if}
 
 {#each buildingsState.placed as building (building.id)}
-	<T.Mesh position={getBuildingCenter(building.anchor, building.def.footprint)}>
-		<T.BoxGeometry args={[building.def.footprint[0], BUILDING_HEIGHT, building.def.footprint[1]]} />
-		<T.MeshStandardMaterial color="#9aa4b5" />
-	</T.Mesh>
+	<BuildingModel def={building.def} anchor={building.anchor} />
 {/each}
 
 <svelte:window onpointermove={handlePointerMove} onclick={handleClick} onkeydown={handleKeydown} />

@@ -13,7 +13,9 @@
 	let open = $state(false);
 
 	function formatCost(cost: ResourceCost): string {
-		return Object.entries(cost)
+		const entries = Object.entries(cost);
+		if (entries.length === 0) return 'Free';
+		return entries
 			.map(([id, amount]) => `${amount} ${RESOURCES[id as ResourceId].label}`)
 			.join(' + ');
 	}
