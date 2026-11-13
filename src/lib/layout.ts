@@ -12,6 +12,14 @@ export type MapSite = {
 	type: MapSiteType;
 	position: [number, number, number];
 	size: [number, number, number];
+	/**
+	 * Public path to the deposit model shown on top of the marker plate, e.g.
+	 * `/models/kenney-space-kit/rock_crystalsLargeA.glb`. Sites without one
+	 * keep the plain coloured mound.
+	 */
+	deposit?: string;
+	/** Turn about Y, in radians, so two deposits never sit identically. */
+	depositYaw?: number;
 };
 
 export const floor: BoxSpec = {
@@ -31,12 +39,16 @@ export const sites: MapSite[] = [
 		type: 'minerals',
 		position: [-8, 0.4, -6],
 		size: [3, 0.8, 3],
+		deposit: '/models/kenney-space-kit/rock_crystalsLargeA.glb',
+		depositYaw: 0.6,
 	},
 	{
 		id: 'minerals-east',
 		type: 'minerals',
 		position: [9, 0.4, -8],
 		size: [3, 0.8, 3],
+		deposit: '/models/kenney-space-kit/rock_crystalsLargeB.glb',
+		depositYaw: 2.6,
 	},
 	{ id: 'h3-west', type: 'h3', position: [-10, 0.5, 8], size: [2.5, 1, 2.5] },
 	{
