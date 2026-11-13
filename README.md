@@ -114,4 +114,6 @@ boundaries, naming, and the rules the frame loop follows.
 
 ## License
 
-MIT
+The source code in this repository is released under the [MIT License](LICENSE).
+
+Third-party art assets and libraries are credited in [CREDITS.md](CREDITS.md).
