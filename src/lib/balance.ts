@@ -33,6 +33,8 @@ export type BuildingDef = {
 	footprint: [number, number];
 	cost: ResourceCost;
 	power: { draw?: number; generate?: number };
+	/** Housing slots this structure provides, if any. */
+	housing?: number;
 	unlock?: { minPopulation?: number };
 	/** Public path to a glTF model, e.g. `/models/kaykit/drill_structure.gltf`. */
 	model?: string;

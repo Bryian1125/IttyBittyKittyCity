@@ -16,7 +16,8 @@ export type PlacedBuilding = {
 	anchor: Cell;
 };
 
-export type PlacementProblem = 'out-of-bounds' | 'occupied' | 'unaffordable';
+export type PlacementProblem =
+	'out-of-bounds' | 'occupied' | 'unaffordable' | 'locked';
 
 /** Grid math: cell (i, j) spans world [i - 0.5, i + 0.5) on both axes. */
 export function toCell(x: number, z: number): Cell {

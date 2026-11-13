@@ -7,6 +7,8 @@
 	import { RESOURCES, type ResourceId } from '../lib/balance';
 	import { computePower } from '../lib/power';
 	import { buildingsState } from '../state/buildings.svelte';
+	import { getCarried, getCarryCapacity } from '../state/carry.svelte';
+	import { getHousingCapacity, getPopulation } from '../state/npcs.svelte';
 	import { getResource } from '../state/resources.svelte';
 
 	const HUD_RESOURCES = (Object.keys(RESOURCES) as ResourceId[]).filter(
@@ -23,6 +25,16 @@
 			<span class="amount">{getResource(id)}</span>
 		</div>
 	{/each}
+
+	<div class="box">
+		<span class="name">Carried</span>
+		<span class="amount">{getCarried()}/{getCarryCapacity()}</span>
+	</div>
+
+	<div class="box">
+		<span class="name">Colonists</span>
+		<span class="amount">{getPopulation()}/{getHousingCapacity()}</span>
+	</div>
 
 	<div class="box" data-low={power.demand > 0 && power.satisfaction < 1}>
 		<span class="name">Power</span>

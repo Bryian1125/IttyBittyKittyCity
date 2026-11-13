@@ -8,6 +8,7 @@
 <script lang="ts">
 	import { BUILDINGS, RESOURCES, type ResourceCost, type ResourceId } from '../lib/balance';
 	import { buildingsState, startPlacing } from '../state/buildings.svelte';
+	import { isUnlocked } from '../state/npcs.svelte';
 	import { canAfford } from '../state/resources.svelte';
 
 	let open = $state(false);
@@ -30,10 +31,16 @@
 					class="option"
 					data-affordable={canAfford(def.cost)}
 					data-selected={buildingsState.selected?.id === def.id}
+					data-locked={!isUnlocked(def)}
+					disabled={!isUnlocked(def)}
 					onclick={() => startPlacing(def)}
 				>
 					{def.name}
-					<span class="cost">{formatCost(def.cost)}</span>
+					{#if !isUnlocked(def)}
+						<span class="locked">Requires {def.unlock?.minPopulation} colonists</span>
+					{:else}
+						<span class="cost">{formatCost(def.cost)}</span>
+					{/if}
 				</button>
 			{/each}
 		</div>
@@ -105,6 +112,17 @@
 				background: linear-gradient(180deg, #ffffff, #ffdcdc);
 			}
 
+			&[data-locked='true'] {
+				border-color: rgba(178, 188, 202, 0.9);
+				color: #8a93a1;
+				cursor: not-allowed;
+				background: linear-gradient(180deg, #f7f9fc, #e6ebf2);
+
+				&:hover {
+					transform: none;
+				}
+			}
+
 			&[data-selected='true'] {
 				transform: scale(1.06);
 				box-shadow:
@@ -116,6 +134,12 @@
 				font-size: 0.75rem;
 				font-weight: 600;
 				color: #5a6472;
+			}
+
+			& .locked {
+				font-size: 0.75rem;
+				font-weight: 600;
+				color: #8a93a1;
 			}
 		}
 	}

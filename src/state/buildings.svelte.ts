@@ -5,6 +5,7 @@ import {
 	type PlacedBuilding,
 	type PlacementProblem,
 } from '../lib/placement';
+import { isUnlocked } from './npcs.svelte';
 import { canAfford, spendResource } from './resources.svelte';
 
 type BuildingsState = {
@@ -45,6 +46,7 @@ export function getPlacementProblemAt(anchor: Cell): PlacementProblem | null {
 		buildingsState.placed,
 	);
 	if (problem !== null) return problem;
+	if (!isUnlocked(def)) return 'locked';
 
 	return canAfford(def.cost) ? null : 'unaffordable';
 }
