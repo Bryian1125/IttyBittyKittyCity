@@ -24,8 +24,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: flex-end;
-		padding-bottom: 15vh;
+		justify-content: center;
 		height: 100%;
 		font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 		background: #16161d;
