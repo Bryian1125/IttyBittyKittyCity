@@ -3,9 +3,11 @@
 	World interaction: every frame it finds the nearest interactable within
 	reach — resource nodes (#5) and refinery input buffers (#6) — shows the [F]
 	prompt, and fires its action on an F press (the camera owns Q/E). Build
-	placement mode wins: no prompt while a structure is selected.
+	placement mode wins: a short hint replaces the prompt while a structure is
+	selected.
 -->
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import type { Group } from 'three';
 	import { COLLECTION, REFINING } from '../lib/balance';
 	import { pickNearest, type Interactable } from '../lib/interact';
@@ -86,6 +88,10 @@
 		return () => cancelAnimationFrame(frame);
 	});
 
+	onDestroy(() => {
+		clearTimeout(toastTimer);
+	});
+
 	function onKeydown(event: KeyboardEvent): void {
 		if (event.code !== 'KeyF' || event.repeat) return;
 		if (buildingsState.selected !== undefined || nearest === undefined) return;
@@ -97,7 +103,9 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-{#if nearest !== undefined}
+{#if buildingsState.selected !== undefined}
+	<div class="prompt">Build mode — click to place, Esc to cancel</div>
+{:else if nearest !== undefined}
 	<div class="prompt">[F] {nearest.label}</div>
 {/if}
 {#if toast !== undefined}

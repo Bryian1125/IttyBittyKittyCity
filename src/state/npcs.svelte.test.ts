@@ -37,6 +37,18 @@ function placeDef(def: BuildingDef, column = 0, row = 0): void {
 	});
 }
 
+/** World-space span of a placed building's footprint; cell i spans [i - 0.5, i + 0.5). */
+function footprintBounds(building: {
+	def: BuildingDef;
+	anchor: { column: number; row: number };
+}): { minX: number; maxX: number; minZ: number; maxZ: number } {
+	const [width, depth] = building.def.footprint;
+	const minX = building.anchor.column - 0.5;
+	const minZ = building.anchor.row - 0.5;
+
+	return { minX, maxX: minX + width, minZ, maxZ: minZ + depth };
+}
+
 describe('population state', () => {
 	it('starts empty with no housing', () => {
 		expect(npcs.getPopulation()).toBe(0);
@@ -130,5 +142,24 @@ describe('population state', () => {
 		expect(npcs.colonistViews()).toEqual([
 			{ id: expect.any(Number), x: expect.any(Number), z: expect.any(Number) },
 		]);
+	});
+
+	it('spawns a colonist in open ground outside the housing footprint', () => {
+		placeDef(getDef('block-4x4'));
+		resources.addResource('food', 100);
+
+		npcs.tickPopulation(POPULATION.arrivalSeconds);
+
+		const views = npcs.colonistViews();
+		expect(views).toHaveLength(1);
+
+		for (const building of buildings.buildingsState.placed) {
+			const { minX, maxX, minZ, maxZ } = footprintBounds(building);
+			for (const view of views) {
+				const inside =
+					view.x >= minX && view.x <= maxX && view.z >= minZ && view.z <= maxZ;
+				expect(inside, `colonist at ${view.x}, ${view.z}`).toBe(false);
+			}
+		}
 	});
 });

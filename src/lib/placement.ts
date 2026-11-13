@@ -1,5 +1,6 @@
 import { BUILD_BOUNDS, BUILDING_HEIGHT, type BuildingDef } from './balance';
 import { obstacles, type BoxSpec } from './layout';
+import { NODE_SPECS } from './nodes';
 
 export type Cell = { column: number; row: number };
 
@@ -78,6 +79,17 @@ function rectsOverlap(a: CellRect, b: CellRect): boolean {
 
 const obstacleFootprints = obstacles.map(toFootprint);
 
+// Resource nodes are landmarks: a building over one would bury it for good
+// (there is no demolition), so their cells are as occupied as obstacles.
+const nodeFootprints = NODE_SPECS.map((node) =>
+	toFootprint({
+		id: node.id,
+		position: [node.position.x, 0, node.position.z],
+		size: [1, 1, 1],
+		color: '',
+	}),
+);
+
 /** null when the structure fits at the anchor; otherwise the blocking problem. */
 export function getPlacementProblem(
 	anchor: Cell,
@@ -96,6 +108,8 @@ export function getPlacementProblem(
 
 	if (obstacleFootprints.some((obstacle) => rectsOverlap(rect, obstacle)))
 		return 'occupied';
+
+	if (nodeFootprints.some((node) => rectsOverlap(rect, node))) return 'occupied';
 
 	if (
 		placedBuildings.some((building) =>

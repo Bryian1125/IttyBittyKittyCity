@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BUILD_BOUNDS, type BuildingDef } from './balance';
+import { NODE_SPECS } from './nodes';
 import {
 	getFootprint,
 	getPlacementProblem,
@@ -98,6 +99,14 @@ describe('getPlacementProblem', () => {
 		expect(getPlacementProblem({ column: 4, row: 3 }, [1, 1], [])).toBe(
 			'occupied',
 		);
+	});
+
+	it('rejects overlaps with resource nodes', () => {
+		const node = NODE_SPECS[0];
+
+		expect(
+			getPlacementProblem({ column: node.position.x, row: node.position.z }, [1, 1], []),
+		).toBe('occupied');
 	});
 
 	it('rejects overlaps with placed buildings but allows neighbours', () => {
