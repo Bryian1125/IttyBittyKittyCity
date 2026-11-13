@@ -50,7 +50,6 @@ export const BUILDINGS: BuildingDef[] = [
 		footprint: [4, 4],
 		cost: { materials: 5 },
 		power: {},
-		housing: 4,
 	},
 	{
 		id: 'block-2x4',
@@ -59,7 +58,6 @@ export const BUILDINGS: BuildingDef[] = [
 		footprint: [2, 4],
 		cost: { materials: 4 },
 		power: {},
-		housing: 2,
 	},
 	{
 		id: 'block-3x5',
@@ -68,15 +66,6 @@ export const BUILDINGS: BuildingDef[] = [
 		footprint: [3, 5],
 		cost: { materials: 8 },
 		power: { draw: 5 },
-		unlock: { minPopulation: 2 },
-	},
-	{
-		id: 'refinery',
-		name: 'Refinery',
-		category: 'processor',
-		footprint: [3, 3],
-		cost: { materials: 12 },
-		power: { draw: 6 },
 	},
 	{
 		id: 'power-block',
@@ -106,35 +95,4 @@ export const BUILD_BOUNDS = {
 	maxColumn: 29,
 	minRow: -29,
 	maxRow: 29,
-};
-
-/** Walk-up interaction tuning for resource nodes. */
-export const COLLECTION = {
-	interactRadius: 1.5,
-	yieldPerCollect: 3,
-	cooldownSeconds: 15,
-};
-
-/** How much Raw Minerals the player can haul at once. */
-export const CARRY = {
-	capacity: 10,
-};
-
-/** Refinery conversion tuning; the recipe lives here once (issue #6). */
-export const REFINING = {
-	batchSeconds: 8,
-	inputPerBatch: 3,
-	outputPerBatch: 1,
-	bufferCapacity: 20,
-	/** Walk-up radius at the building centre for depositing. */
-	interactRadius: 3.5,
-};
-
-/** Colonist arrival and upkeep tuning (issue #7). */
-export const POPULATION = {
-	arrivalSeconds: 30,
-	upkeepSeconds: 60,
-	upkeepPerColonist: 1,
-	/** Food stock that must stay at or above this for growth to continue. */
-	growthFoodFloor: 5,
 };
