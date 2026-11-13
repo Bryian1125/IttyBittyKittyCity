@@ -54,19 +54,23 @@ npm run preview
 ```
 src/
 ├── main.ts                 # App entry point
-├── App.svelte              # Root component – sets up Canvas, Player, Camera, Environment
+├── App.svelte              # Root component – menu, canvas, and HUD wiring
 ├── app.css                 # Global styles
 ├── engine/
 │   ├── PlayerController.ts # Movement logic with collision detection
 │   ├── CollisionSystem.ts  # AABB collision detection against obstacles and placed buildings
-│   └── FollowCameraSystem.ts # Smooth camera following player
+│   └── FollowCameraSystem.ts # Tweened orbit camera around a follow focus
 ├── ui/
+│   ├── MainMenu.svelte     # Wii/iisu styled title screen
 │   ├── Player.svelte       # Kitty player mesh + controller binding
 │   ├── Environment.svelte  # Floor, obstacles, lighting
 │   ├── Placement.svelte    # Build-mode ghost preview + click-to-place
-│   ├── BuildingToolbar.svelte # Build picker, placement status, power readout
+│   ├── BuildMenu.svelte    # Bottom-right build button and building picker
+│   ├── ResourceHud.svelte  # Bottom-left resource and power counters
 │   └── FollowCamera.svelte # Camera that follows the player
 ├── state/
+│   ├── ui.svelte.ts        # Screen and game-start state
+│   ├── camera.svelte.ts    # Orbit camera yaw
 │   ├── resources.svelte.ts # Resource pools and spend checks
 │   └── buildings.svelte.ts # Placed buildings and placement selection
 └── lib/
@@ -74,7 +78,9 @@ src/
     ├── placement.ts        # Grid math and placement validation
     ├── power.ts            # Power generation / demand satisfaction
     ├── layout.ts           # City layout (floor + obstacle positions)
-    └── input.ts            # Keyboard input reading (WASD/Arrow keys)
+    ├── input.ts            # Keyboard input reading (WASD/Arrow keys)
+    ├── cameraInput.ts      # Q/E orbit-camera key bindings
+    └── data/               # Save-file serialization and storage adapters
 ```
 
 ## Controls

@@ -3,8 +3,11 @@ export type ResourceId = 'food' | 'rawMinerals' | 'materials' | 'h3';
 export type ResourceCost = Partial<Record<ResourceId, number>>;
 
 export type ResourceConfig = {
+	label: string;
 	starting: number;
 	cap: number;
+	/** Whether the bottom-left HUD shows a counter box for it. */
+	hud: boolean;
 };
 
 /**
@@ -13,10 +16,10 @@ export type ResourceConfig = {
  * Starting Materials seed the first buildings, Food the first colonist.
  */
 export const RESOURCES: Record<ResourceId, ResourceConfig> = {
-	food: { starting: 5, cap: 999 },
-	rawMinerals: { starting: 0, cap: 999 },
-	materials: { starting: 20, cap: 999 },
-	h3: { starting: 0, cap: 999 },
+	food: { label: 'Food', starting: 5, cap: 999, hud: true },
+	rawMinerals: { label: 'Raw Minerals', starting: 0, cap: 999, hud: false },
+	materials: { label: 'Materials', starting: 20, cap: 999, hud: true },
+	h3: { label: 'H3', starting: 0, cap: 999, hud: false },
 };
 
 export type BuildingCategory = 'housing' | 'factory' | 'processor' | 'power';

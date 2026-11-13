@@ -23,22 +23,28 @@ src/
   App.svelte              Composition root: Canvas + scene children
   app.css                 Global styles
   ui/                     Threlte components (declarative scene graph)
+    MainMenu.svelte       Title screen, game start
     Player.svelte         Player mesh + per-frame task
     Environment.svelte    Floor, walls, crates, lights
     Placement.svelte      Build-mode ghost preview + click-to-place
-    BuildingToolbar.svelte Build picker, placement status, power readout
+    BuildMenu.svelte      Bottom-right build button and building picker
+    ResourceHud.svelte    Bottom-left resource and power counters
     FollowCamera.svelte   Camera rig + wheel zoom listener
   engine/                 Imperative systems (plain TypeScript)
     PlayerController.ts   Movement rules, delta-scaled, collision-aware
     CollisionSystem.ts    AABB collision against layout and placed-building boxes
-    FollowCameraSystem.ts Camera smoothing, zoom clamping
+    FollowCameraSystem.ts Tweened orbit camera around a follow focus
   lib/                    Pure data and helpers
     balance.ts            Resource, building, and buildable-area tunables
+    cameraInput.ts        Q/E orbit-camera key bindings
     input.ts              Keyboard state reader (WASD bindings)
     layout.ts             Floor and obstacle box specifications
     placement.ts          Grid math and placement validation
     power.ts              Power generation/demand satisfaction
+    data/                 Save serialization and storage adapters
   state/                  Cross-component reactive state (.svelte.ts modules)
+    ui.svelte.ts          Screen state and game start
+    camera.svelte.ts      Orbit camera yaw
     resources.svelte.ts   Resource pools and spend checks
     buildings.svelte.ts   Placed buildings and placement selection
 ```
