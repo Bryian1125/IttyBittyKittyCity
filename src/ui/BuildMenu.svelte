@@ -70,6 +70,8 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		width: 15rem;
+		max-height: min(60vh, 24rem);
+		overflow-y: auto;
 		padding: 0.75rem;
 		border: 1px solid rgba(178, 188, 202, 0.9);
 		border-radius: 18px;

@@ -1,5 +1,5 @@
 import { Box3, Vector3 } from 'three';
-import { obstacles, type BoxSpec } from '../lib/layout';
+import { sites, type BoxSpec } from '../lib/layout';
 
 const PLAYER_HALF_SIZE = new Vector3(0.5, 0.5, 0.5);
 
@@ -18,7 +18,7 @@ export class CollisionSystem {
 	#playerBox = new Box3();
 	#boxes: Box3[];
 
-	constructor(specs: CollisionBox[] = obstacles) {
+	constructor(specs: CollisionBox[] = sites) {
 		this.#boxes = specs.map(toBox);
 	}
 

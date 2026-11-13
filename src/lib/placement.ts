@@ -1,5 +1,5 @@
 import { BUILD_BOUNDS, BUILDING_HEIGHT, type BuildingDef } from './balance';
-import { obstacles, type BoxSpec } from './layout';
+import { sites } from './layout';
 import { NODE_SPECS } from './nodes';
 
 export type Cell = { column: number; row: number };
@@ -15,10 +15,33 @@ export type PlacedBuilding = {
 	id: number;
 	def: BuildingDef;
 	anchor: Cell;
+	/** Quarter turns clockwise from the def's authored footprint. */
+	rotation: Rotation;
 };
 
 export type PlacementProblem =
-	'out-of-bounds' | 'occupied' | 'unaffordable' | 'locked';
+	'out-of-bounds' | 'occupied' | 'off-site' | 'unaffordable' | 'locked';
+
+/** Quarter turns clockwise; 0 is the def's authored orientation. */
+export type Rotation = 0 | 1 | 2 | 3;
+
+/** Footprint [width, depth] after `rotation` quarter turns; odd turns swap the axes. */
+export function rotateFootprint(
+	footprint: [number, number],
+	rotation: Rotation,
+): [number, number] {
+	return rotation % 2 === 0 ? footprint : [footprint[1], footprint[0]];
+}
+
+/** The next quarter turn clockwise, wrapping back to 0. */
+export function nextRotation(rotation: Rotation): Rotation {
+	return ((rotation + 1) % 4) as Rotation;
+}
+
+type FootprintSource = {
+	position: [number, number, number];
+	size: [number, number, number];
+};
 
 /** Grid math: cell (i, j) spans world [i - 0.5, i + 0.5) on both axes. */
 export function toCell(x: number, z: number): Cell {
@@ -54,11 +77,11 @@ export function getBuildingCenter(
 }
 
 /** A cell counts as occupied when the structure's geometry touches any part of it. */
-function toFootprint(spec: BoxSpec): CellRect {
-	const minX = spec.position[0] - spec.size[0] / 2;
-	const maxX = spec.position[0] + spec.size[0] / 2;
-	const minZ = spec.position[2] - spec.size[2] / 2;
-	const maxZ = spec.position[2] + spec.size[2] / 2;
+function toFootprint(source: FootprintSource): CellRect {
+	const minX = source.position[0] - source.size[0] / 2;
+	const maxX = source.position[0] + source.size[0] / 2;
+	const minZ = source.position[2] - source.size[2] / 2;
+	const maxZ = source.position[2] + source.size[2] / 2;
 
 	return {
 		minColumn: Math.floor(minX + 0.5),
@@ -77,26 +100,44 @@ function rectsOverlap(a: CellRect, b: CellRect): boolean {
 	);
 }
 
-const obstacleFootprints = obstacles.map(toFootprint);
+function rectContainsCell(rect: CellRect, cell: Cell): boolean {
+	return (
+		cell.column >= rect.minColumn &&
+		cell.column <= rect.maxColumn &&
+		cell.row >= rect.minRow &&
+		cell.row <= rect.maxRow
+	);
+}
 
 // Resource nodes are landmarks: a building over one would bury it for good
-// (there is no demolition), so their cells are as occupied as obstacles.
+// (there is no demolition), so their cells are as occupied as the sites.
 const nodeFootprints = NODE_SPECS.map((node) =>
 	toFootprint({
-		id: node.id,
 		position: [node.position.x, 0, node.position.z],
 		size: [1, 1, 1],
-		color: '',
 	}),
 );
 
-/** null when the structure fits at the anchor; otherwise the blocking problem. */
+const siteFootprints = sites.map((site) => ({
+	type: site.type,
+	rect: toFootprint(site),
+}));
+
+/**
+ * null when the structure fits at the anchor; otherwise the blocking problem.
+ * A site-typed structure must cover a matching collection point; other
+ * structures may not cover any, and the player's own cell always blocks.
+ * `rotation` is the in-flight quarter turn applied to the candidate; already
+ * placed structures are tested against their own stored rotation.
+ */
 export function getPlacementProblem(
+	def: BuildingDef,
 	anchor: Cell,
-	footprint: [number, number],
 	placedBuildings: PlacedBuilding[],
+	playerCell?: Cell,
+	rotation: Rotation = 0,
 ): PlacementProblem | null {
-	const rect = getFootprint(anchor, footprint);
+	const rect = getFootprint(anchor, rotateFootprint(def.footprint, rotation));
 	if (
 		rect.minColumn < BUILD_BOUNDS.minColumn ||
 		rect.maxColumn > BUILD_BOUNDS.maxColumn ||
@@ -106,18 +147,33 @@ export function getPlacementProblem(
 		return 'out-of-bounds';
 	}
 
-	if (obstacleFootprints.some((obstacle) => rectsOverlap(rect, obstacle)))
+	if (playerCell !== undefined && rectContainsCell(rect, playerCell))
 		return 'occupied';
 
-	if (nodeFootprints.some((node) => rectsOverlap(rect, node))) return 'occupied';
+	if (nodeFootprints.some((node) => rectsOverlap(rect, node)))
+		return 'occupied';
 
 	if (
 		placedBuildings.some((building) =>
-			rectsOverlap(rect, getFootprint(building.anchor, building.def.footprint)),
+			rectsOverlap(
+				rect,
+				getFootprint(
+					building.anchor,
+					rotateFootprint(building.def.footprint, building.rotation),
+				),
+			),
 		)
 	) {
 		return 'occupied';
 	}
+
+	let onSite = false;
+	for (const site of siteFootprints) {
+		if (!rectsOverlap(rect, site.rect)) continue;
+		if (def.site === site.type) onSite = true;
+		else return 'occupied';
+	}
+	if (def.site !== undefined && !onSite) return 'off-site';
 
 	return null;
 }

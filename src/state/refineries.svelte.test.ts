@@ -1,208 +1,113 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-	BUILDINGS,
-	REFINING,
-	RESOURCES,
-	type BuildingDef,
-	type ResourceId,
-} from '../lib/balance';
-import type { PlacedBuilding } from '../lib/placement';
+import { BUILDINGS, TRANSFER, type BuildingDef } from '../lib/balance';
 import { buildingsState } from './buildings.svelte';
 import { addCarried, getCarried, takeCarried } from './carry.svelte';
-import {
-	depositIntoRefinery,
-	refineryViews,
-	tickRefineries,
-	type RefineryView,
-} from './refineries.svelte';
-import { addResource, getResource, spendResource } from './resources.svelte';
+import { getRefineryInput } from './economy.svelte';
+import { depositIntoRefinery, refineryViews } from './refineries.svelte';
 
-/** Reads the real registry, so these tests track balance changes. */
 function getDef(id: string): BuildingDef {
-	const def = BUILDINGS.find((entry) => entry.id === id);
-	if (def === undefined) throw new Error(`unknown building def: ${id}`);
+	const def = BUILDINGS.find((building) => building.id === id);
+	if (def === undefined) throw new Error(`Unknown building def: ${id}`);
 	return def;
 }
 
-function place(
-	id: number,
-	def: BuildingDef,
-	column = 0,
-	row = 0,
-): PlacedBuilding {
-	const building: PlacedBuilding = { id, def, anchor: { column, row } };
-	buildingsState.placed.push(building);
-	return building;
+// Ids must be unique across tests: the economy store persists buffers by
+// building id between tests within this module graph.
+let nextId = 100;
+function placeDef(defId: string, column = 0, row = 0): number {
+	const id = nextId;
+	nextId += 1;
+	buildingsState.placed.push({
+		id,
+		def: getDef(defId),
+		anchor: { column, row },
+		rotation: 0,
+	});
+	return id;
 }
 
-function findRefinery(id: number): RefineryView {
-	const view = refineryViews().find((entry) => entry.buildingId === id);
-	if (view === undefined) throw new Error(`unknown refinery view: ${id}`);
-	return view;
-}
-
-/** Restores a known load through the public API only. */
-function setCarried(amount: number): void {
-	takeCarried(getCarried());
-	addCarried(amount);
-}
-
-/** Restores a known amount through the public API only. */
-function setResource(id: ResourceId, amount: number): void {
-	spendResource(id, getResource(id));
-	addResource(id, amount);
-}
-
-/** A refinery whose 6 draw is covered by an 8-generation power block. */
-function placePoweredRefinery(id: number): void {
-	place(id, getDef('refinery'));
-	place(id + 100, getDef('power-block'));
-}
-
-describe('refineries', () => {
+describe('refinery facade', () => {
 	beforeEach(() => {
 		buildingsState.placed.length = 0;
-		// Drops the buffers the previous test's buildings left behind.
-		tickRefineries(0);
-		setCarried(0);
-		for (const id of Object.keys(RESOURCES) as ResourceId[]) {
-			setResource(id, RESOURCES[id].starting);
-		}
+		takeCarried(getCarried());
 	});
 
-	it('shows one view per placed refinery at its footprint centre', () => {
-		place(1, getDef('refinery'), 2, 5);
+	it('exposes one view per placed refinery with its centre and capacity', () => {
+		const id = placeDef('refinery-l1');
 
 		expect(refineryViews()).toEqual([
 			{
-				buildingId: 1,
-				x: 3,
-				z: 6,
+				buildingId: id,
+				x: 1,
+				z: 1,
 				input: 0,
-				capacity: REFINING.bufferCapacity,
+				capacity: TRANSFER.refineryInputCapacity,
 				status: 'starved',
 			},
 		]);
 	});
 
-	it('ignores placed buildings that do not convert', () => {
-		place(1, getDef('block-4x4'));
-		place(2, getDef('mining-drill'));
+	it('ignores placed buildings that do not refine', () => {
+		placeDef('solar-panel-l1');
+		placeDef('habitat-block');
 
 		expect(refineryViews()).toEqual([]);
 	});
 
-	it('drops the view once the refinery is removed', () => {
-		place(1, getDef('refinery'));
-		expect(refineryViews()).toHaveLength(1);
+	it('deposits up to the carried amount and empties the load', () => {
+		const id = placeDef('refinery-l1');
+		addCarried(5);
 
-		buildingsState.placed.length = 0;
-
-		expect(refineryViews()).toEqual([]);
-	});
-
-	it('moves the carried load into the input buffer', () => {
-		place(1, getDef('refinery'));
-		setCarried(7);
-
-		expect(depositIntoRefinery(1, REFINING.bufferCapacity)).toBe(7);
+		expect(depositIntoRefinery(id, 99)).toBe(5);
 		expect(getCarried()).toBe(0);
-		expect(findRefinery(1).input).toBe(7);
+		expect(getRefineryInput(id)).toBe(5);
 	});
 
-	it('caps the deposit at the buffer and leaves the rest carried', () => {
-		place(1, getDef('refinery'));
+	it('stops accepting once the buffer is full and leaves the load carried', () => {
+		const id = placeDef('refinery-l1');
 
-		setCarried(10);
-		expect(depositIntoRefinery(1, 8)).toBe(8);
-		setCarried(10);
-		expect(depositIntoRefinery(1, 10)).toBe(10);
-		setCarried(10);
+		// Carry capacity (10) is far below the buffer (30), so fill in trips.
+		for (let trip = 0; trip < 3; trip += 1) {
+			addCarried(10);
+			expect(depositIntoRefinery(id, 10)).toBe(10);
+		}
+		expect(getRefineryInput(id)).toBe(TRANSFER.refineryInputCapacity);
 
-		const room = REFINING.bufferCapacity - 18;
-		expect(depositIntoRefinery(1, 10)).toBe(room);
-		expect(getCarried()).toBe(10 - room);
-		expect(findRefinery(1).input).toBe(REFINING.bufferCapacity);
+		addCarried(10);
+		expect(depositIntoRefinery(id, 10)).toBe(0);
+		expect(getCarried()).toBe(10);
 	});
 
-	it('returns zero for buildings that are not refineries', () => {
-		place(1, getDef('block-4x4'));
-		setCarried(5);
+	it('returns 0 for unknown ids and non-refinery buildings', () => {
+		const solar = placeDef('solar-panel-l1');
+		addCarried(4);
 
-		expect(depositIntoRefinery(1, 5)).toBe(0);
-		expect(depositIntoRefinery(99, 5)).toBe(0);
-		expect(getCarried()).toBe(5);
+		expect(depositIntoRefinery(solar, 4)).toBe(0);
+		expect(depositIntoRefinery(999_999, 4)).toBe(0);
+		expect(getCarried()).toBe(4);
 	});
 
-	it('mints Materials from a completed batch on a powered grid', () => {
-		placePoweredRefinery(1);
-		setCarried(REFINING.inputPerBatch);
-		depositIntoRefinery(1, REFINING.inputPerBatch);
-		const before = getResource('materials');
+	it('reports starved, low-power, and working as input and power change', () => {
+		const id = placeDef('refinery-l1');
+		expect(refineryViews()[0]?.status).toBe('starved');
 
-		tickRefineries(REFINING.batchSeconds);
+		addCarried(3);
+		depositIntoRefinery(id, 3);
 
-		expect(getResource('materials')).toBe(before + REFINING.outputPerBatch);
-		expect(findRefinery(1).input).toBe(0);
+		// Fed, but the refinery (draw 4) has no generation: low power.
+		expect(refineryViews()[0]?.status).toBe('low-power');
+
+		placeDef('solar-panel-l3');
+		expect(refineryViews()[0]?.status).toBe('working');
 	});
 
-	it('holds the buffer while the grid cannot cover the draw', () => {
-		place(1, getDef('refinery'));
-		setCarried(REFINING.inputPerBatch);
-		depositIntoRefinery(1, REFINING.inputPerBatch);
-		const before = getResource('materials');
+	it('keeps a below-batch refinery starved even at full power', () => {
+		const id = placeDef('refinery-l1');
+		placeDef('solar-panel-l3');
 
-		tickRefineries(REFINING.batchSeconds * 2);
+		addCarried(2);
+		depositIntoRefinery(id, 2);
 
-		expect(getResource('materials')).toBe(before);
-		expect(findRefinery(1).input).toBe(REFINING.inputPerBatch);
-	});
-
-	it('accumulates progress across ticks before the batch lands', () => {
-		placePoweredRefinery(1);
-		setCarried(REFINING.inputPerBatch);
-		depositIntoRefinery(1, REFINING.inputPerBatch);
-		const before = getResource('materials');
-
-		tickRefineries(REFINING.batchSeconds / 2);
-		expect(getResource('materials')).toBe(before);
-
-		tickRefineries(REFINING.batchSeconds / 2);
-
-		expect(getResource('materials')).toBe(before + REFINING.outputPerBatch);
-		expect(findRefinery(1).input).toBe(0);
-	});
-
-	it('stretches the conversion at partial power', () => {
-		place(1, getDef('refinery'));
-		place(2, getDef('refinery'));
-		place(3, getDef('power-block'));
-		setCarried(REFINING.inputPerBatch);
-		depositIntoRefinery(1, REFINING.inputPerBatch);
-		const before = getResource('materials');
-
-		expect(findRefinery(1).status).toBe('low-power');
-
-		tickRefineries(REFINING.batchSeconds);
-		expect(getResource('materials')).toBe(before);
-
-		tickRefineries(REFINING.batchSeconds);
-		expect(getResource('materials')).toBe(before + REFINING.outputPerBatch);
-	});
-
-	it('flips status as the buffer and the grid change', () => {
-		place(1, getDef('refinery'));
-		expect(findRefinery(1).status).toBe('starved');
-
-		setCarried(REFINING.inputPerBatch);
-		depositIntoRefinery(1, REFINING.inputPerBatch);
-		expect(findRefinery(1).status).toBe('low-power');
-
-		place(2, getDef('power-block'));
-		expect(findRefinery(1).status).toBe('working');
-
-		tickRefineries(REFINING.batchSeconds);
-
-		expect(findRefinery(1).status).toBe('starved');
+		expect(refineryViews()[0]?.status).toBe('starved');
 	});
 });

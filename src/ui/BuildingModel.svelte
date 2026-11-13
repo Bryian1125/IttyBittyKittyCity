@@ -20,23 +20,28 @@
 		type Object3D,
 	} from 'three';
 	import { BUILDING_HEIGHT, type BuildingDef } from '../lib/balance';
-	import { getBuildingCenter, type Cell } from '../lib/placement';
+	import { getBuildingCenter, rotateFootprint, type Cell, type Rotation } from '../lib/placement';
 
 	let {
 		def,
 		anchor,
+		rotation = 0,
 		tint,
 		opacity = 1,
 	}: {
 		def: BuildingDef;
 		anchor: Cell;
+		/** Quarter turns clockwise from the def's authored orientation. */
+		rotation?: Rotation;
 		/** Ghost colour: clones the materials, tints them, and makes them translucent. */
 		tint?: string;
 		/** Ghost alpha; ignored when `tint` is undefined. */
 		opacity?: number;
 	} = $props();
 
-	const center = $derived(getBuildingCenter(anchor, def.footprint));
+	const footprint = $derived(rotateFootprint(def.footprint, rotation));
+	const center = $derived(getBuildingCenter(anchor, footprint));
+	const yaw = $derived((rotation * Math.PI) / 2);
 
 	// The loader is cached by URL and read once per instance; the prop is fixed
 	// for the lifetime of a placed building.
@@ -124,7 +129,7 @@
 </script>
 
 {#if model !== undefined}
-	<T.Group position={[center[0], 0, center[2]]}>
+	<T.Group position={[center[0], 0, center[2]]} rotation={[0, yaw, 0]}>
 		<!-- Cloned meshes share the cached geometries/materials, so never dispose them. -->
 		<T is={model} dispose={false} />
 	</T.Group>
@@ -134,7 +139,7 @@
 		loads, and the fallback if loading fails, so a building is never invisible.
 	-->
 	<T.Mesh position={center}>
-		<T.BoxGeometry args={[def.footprint[0], BUILDING_HEIGHT, def.footprint[1]]} />
+		<T.BoxGeometry args={[footprint[0], BUILDING_HEIGHT, footprint[1]]} />
 		<T.MeshStandardMaterial
 			color={tint ?? '#9aa4b5'}
 			transparent={tint !== undefined}

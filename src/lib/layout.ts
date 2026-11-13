@@ -1,9 +1,26 @@
-export interface BoxSpec {
+export type BoxSpec = {
 	id: string;
 	position: [number, number, number];
 	size: [number, number, number];
 	color: string;
-}
+};
+
+export type MapSiteType = 'h3' | 'minerals' | 'nuclear';
+
+export type MapSite = {
+	id: string;
+	type: MapSiteType;
+	position: [number, number, number];
+	size: [number, number, number];
+	/**
+	 * Public path to the deposit model shown on top of the marker plate, e.g.
+	 * `/models/kenney-space-kit/rock_crystalsLargeA.glb`. Sites without one
+	 * keep the plain coloured mound.
+	 */
+	deposit?: string;
+	/** Turn about Y, in radians, so two deposits never sit identically. */
+	depositYaw?: number;
+};
 
 export const floor: BoxSpec = {
 	id: 'floor',
@@ -12,53 +29,32 @@ export const floor: BoxSpec = {
 	color: '#2b2b2b',
 };
 
-export const obstacles: BoxSpec[] = [
+/**
+ * Collection points: a site-typed structure must be built on top of one, and
+ * no other structure may cover one. Positions and sizes are placeholders.
+ */
+export const sites: MapSite[] = [
 	{
-		id: 'wall-north',
-		position: [0, 1.5, -12],
-		size: [24, 3, 0.5],
-		color: '#4a4a4a',
+		id: 'minerals-north',
+		type: 'minerals',
+		position: [-8, 0.4, -6],
+		size: [3, 0.8, 3],
+		deposit: '/models/kenney-space-kit/rock_crystalsLargeA.glb',
+		depositYaw: 0.6,
 	},
 	{
-		id: 'wall-west',
-		position: [-12, 1.5, 0],
-		size: [0.5, 3, 24],
-		color: '#4a4a4a',
+		id: 'minerals-east',
+		type: 'minerals',
+		position: [9, 0.4, -8],
+		size: [3, 0.8, 3],
+		deposit: '/models/kenney-space-kit/rock_crystalsLargeB.glb',
+		depositYaw: 2.6,
 	},
+	{ id: 'h3-west', type: 'h3', position: [-10, 0.5, 8], size: [2.5, 1, 2.5] },
 	{
-		id: 'wall-east',
-		position: [12, 1.5, 0],
-		size: [0.5, 3, 24],
-		color: '#4a4a4a',
-	},
-	{
-		id: 'crate-small',
-		position: [4, 0.5, 3],
-		size: [1, 1, 1],
-		color: '#8a8a8a',
-	},
-	{
-		id: 'slab-wide',
-		position: [-4, 0.5, -4],
-		size: [4, 1, 2],
-		color: '#6e6e6e',
-	},
-	{
-		id: 'pillar-tall',
-		position: [6, 2, -6],
-		size: [1.5, 4, 1.5],
-		color: '#7c7c7c',
-	},
-	{
-		id: 'block-low',
-		position: [-8, 0.25, 5],
-		size: [3, 0.5, 3],
-		color: '#5d5d5d',
-	},
-	{
-		id: 'wall-segment',
-		position: [2, 2, 9],
-		size: [8, 4, 0.5],
-		color: '#4a4a4a',
+		id: 'nuclear-south',
+		type: 'nuclear',
+		position: [8, 0.4, 10],
+		size: [4, 0.8, 4],
 	},
 ];

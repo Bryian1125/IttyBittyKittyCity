@@ -5,6 +5,7 @@
 	import MainMenu from './ui/MainMenu.svelte';
 	import BuildMenu from './ui/BuildMenu.svelte';
 	import Colonists from './ui/Colonists.svelte';
+	import EconomyLayer from './ui/EconomyLayer.svelte';
 	import Environment from './ui/Environment.svelte';
 	import FollowCamera from './ui/FollowCamera.svelte';
 	import Interaction from './ui/Interaction.svelte';
@@ -27,10 +28,11 @@
 			{#if player !== undefined}
 				<FollowCamera target={player} />
 			{/if}
-			<Placement {collision} />
+			<Placement {collision} {player} />
 			<Nodes />
 			<Refineries />
 			<Colonists />
+			<EconomyLayer />
 		</Canvas>
 		<BuildMenu />
 		<ResourceHud />

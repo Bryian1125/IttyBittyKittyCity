@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CARRY, COLLECTION } from './balance';
-import { obstacles, type BoxSpec } from './layout';
+import { sites, type MapSite } from './layout';
 import {
 	advanceCooldown,
 	findNodeSpec,
@@ -16,18 +16,18 @@ const KIND_LABELS: Record<NodeKind, string> = {
 	food: 'Collect Food',
 };
 
-/** Shortest ground-plane distance from a node to an obstacle box. */
-function obstacleDistance(spec: NodeSpec, box: BoxSpec): number {
-	const [boxX, , boxZ] = box.position;
-	const [boxWidth, , boxDepth] = box.size;
+/** Shortest ground-plane distance from a node to a collection-point site. */
+function siteDistance(spec: NodeSpec, site: MapSite): number {
+	const [siteX, , siteZ] = site.position;
+	const [siteWidth, , siteDepth] = site.size;
 	const dx = Math.max(
-		boxX - boxWidth / 2 - spec.position.x,
-		spec.position.x - (boxX + boxWidth / 2),
+		siteX - siteWidth / 2 - spec.position.x,
+		spec.position.x - (siteX + siteWidth / 2),
 		0,
 	);
 	const dz = Math.max(
-		boxZ - boxDepth / 2 - spec.position.z,
-		spec.position.z - (boxZ + boxDepth / 2),
+		siteZ - siteDepth / 2 - spec.position.z,
+		spec.position.z - (siteZ + siteDepth / 2),
 		0,
 	);
 	return Math.hypot(dx, dz);
@@ -62,13 +62,13 @@ describe('node specs', () => {
 		}
 	});
 
-	it('keeps every node at least two units clear of every obstacle', () => {
+	it('keeps every node at least two units clear of every site', () => {
 		for (const spec of NODE_SPECS) {
-			for (const box of obstacles) {
-				const distance = obstacleDistance(spec, box);
+			for (const site of sites) {
+				const distance = siteDistance(spec, site);
 				expect(
 					distance,
-					`${spec.id} is ${distance} from ${box.id}`,
+					`${spec.id} is ${distance} from ${site.id}`,
 				).toBeGreaterThanOrEqual(2);
 			}
 		}

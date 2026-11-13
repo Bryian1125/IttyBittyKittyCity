@@ -8,13 +8,16 @@ and libraries shipped with the project are listed below.
 | Asset                                                                                                 | Author                                                            | License           | Source                                              |
 | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------- | --------------------------------------------------- |
 | KayKit Space Base Bits (1.0) — `drill_structure.gltf`, `drill_structure.bin`, `spacebits_texture.png` | Kay Lousberg ([www.kaylousberg.com](https://www.kaylousberg.com)) | CC0 1.0 Universal | [kaylousberg.itch.io](https://kaylousberg.itch.io/) |
+| Kenney Space Kit (2.0) — `rock_crystalsLargeA.glb`, `rock_crystalsLargeB.glb`                         | Kenney ([www.kenney.nl](https://www.kenney.nl))                   | CC0 1.0 Universal | [kenney.nl/assets/space-kit](https://kenney.nl/assets/space-kit) |
 
-KayKit Space Base Bits was created and distributed by Kay Lousberg, creation
-date 1 September 2023. It is released under
+Both packs are released under
 [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), which
 places the work in the public domain and requires no attribution. Credit is
-given here voluntarily. The upstream license text is kept at
-[`public/models/kaykit/LICENSE.txt`](public/models/kaykit/LICENSE.txt).
+given here voluntarily. Upstream license texts are kept alongside the files:
+[`public/models/kaykit/LICENSE.txt`](public/models/kaykit/LICENSE.txt) (KayKit
+Space Base Bits, created 1 September 2023) and
+[`public/models/kenney-space-kit/License.txt`](public/models/kenney-space-kit/License.txt)
+(Kenney Space Kit 2.0, created 27 August 2020).
 
 ## Runtime libraries
 

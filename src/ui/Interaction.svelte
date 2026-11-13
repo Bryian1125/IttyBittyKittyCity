@@ -9,7 +9,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import type { Group } from 'three';
-	import { COLLECTION, REFINING } from '../lib/balance';
+	import { COLLECTION, DEPOSIT } from '../lib/balance';
 	import { pickNearest, type Interactable } from '../lib/interact';
 	import { buildingsState } from '../state/buildings.svelte';
 	import { getCarried, getCarryCapacity } from '../state/carry.svelte';
@@ -53,7 +53,7 @@
 				id: `refinery:${refinery.buildingId}`,
 				x: refinery.x,
 				z: refinery.z,
-				radius: REFINING.interactRadius,
+				radius: DEPOSIT.interactRadius,
 				label: `Deposit Raw Minerals — ${getCarried()}/${getCarryCapacity()} carried`,
 				enabled: refinery.input < refinery.capacity && getCarried() > 0,
 				act: () => {

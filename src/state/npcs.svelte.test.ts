@@ -34,6 +34,7 @@ function placeDef(def: BuildingDef, column = 0, row = 0): void {
 		id: buildings.buildingsState.placed.length + 1,
 		def,
 		anchor: { column, row },
+		rotation: 0,
 	});
 }
 
@@ -58,14 +59,14 @@ describe('population state', () => {
 	it('sums housing across placed buildings only', () => {
 		expect(npcs.getHousingCapacity()).toBe(0);
 
-		placeDef(getDef('block-2x4'));
-		placeDef(getDef('block-4x4'), 6);
-		expect(npcs.getHousingCapacity()).toBe(6);
+		placeDef(getDef('habitat-block'));
+		placeDef(getDef('habitat-block'), 6);
+		expect(npcs.getHousingCapacity()).toBe(8);
 
-		placeDef(getDef('refinery'), 12);
-		placeDef(getDef('power-block'), 16);
-		placeDef(getDef('mining-drill'), 20);
-		expect(npcs.getHousingCapacity()).toBe(6);
+		placeDef(getDef('refinery-l1'), 12);
+		placeDef(getDef('solar-panel-l1'), 16);
+		placeDef(getDef('mineral-collector-l1'), 20);
+		expect(npcs.getHousingCapacity()).toBe(8);
 
 		buildings.buildingsState.placed.length = 0;
 		expect(npcs.getHousingCapacity()).toBe(0);
@@ -81,8 +82,8 @@ describe('population state', () => {
 	});
 
 	it('unlocks defs once the population meets their gate', () => {
-		const gated = getDef('block-3x5');
-		const ungated = getDef('block-2x4');
+		const gated = getDef('nuclear-plant-l1');
+		const ungated = getDef('habitat-block');
 
 		expect(npcs.isUnlocked(gated)).toBe(false);
 		expect(npcs.isUnlocked(ungated)).toBe(true);
@@ -100,7 +101,7 @@ describe('population state', () => {
 	});
 
 	it('grows one colonist per arrival window and drains food', () => {
-		placeDef(getDef('block-2x4'));
+		placeDef(getDef('habitat-block'));
 		resources.addResource('food', 100);
 		const startFood = resources.getResource('food');
 
@@ -110,29 +111,32 @@ describe('population state', () => {
 
 		npcs.tickPopulation(POPULATION.arrivalSeconds);
 		expect(npcs.getPopulation()).toBe(2);
+		expect(resources.getResource('food')).toBe(startFood);
 
 		npcs.tickPopulation(POPULATION.arrivalSeconds);
-		expect(npcs.getPopulation()).toBe(2);
+		expect(npcs.getPopulation()).toBe(3);
 		expect(resources.getResource('food')).toBe(startFood - 1);
 
 		npcs.tickPopulation(POPULATION.arrivalSeconds);
-		expect(resources.getResource('food')).toBe(startFood - 2);
+		expect(npcs.getPopulation()).toBe(4);
+		// Whole-unit spends: the fractional debt from earlier ticks lands here.
+		expect(resources.getResource('food')).toBe(startFood - 3);
 	});
 
 	it('stops growing at housing capacity', () => {
-		placeDef(getDef('block-2x4'));
+		placeDef(getDef('habitat-block'));
 		resources.addResource('food', 500);
 
 		for (let tick = 0; tick < 20; tick += 1) {
 			npcs.tickPopulation(POPULATION.arrivalSeconds);
 		}
 
-		expect(npcs.getHousingCapacity()).toBe(2);
-		expect(npcs.getPopulation()).toBe(2);
+		expect(npcs.getHousingCapacity()).toBe(4);
+		expect(npcs.getPopulation()).toBe(4);
 	});
 
 	it('exposes one view per colonist', () => {
-		placeDef(getDef('block-2x4'));
+		placeDef(getDef('habitat-block'));
 		resources.addResource('food', 100);
 
 		expect(npcs.colonistViews()).toEqual([]);
@@ -145,7 +149,7 @@ describe('population state', () => {
 	});
 
 	it('spawns a colonist in open ground outside the housing footprint', () => {
-		placeDef(getDef('block-4x4'));
+		placeDef(getDef('habitat-block'));
 		resources.addResource('food', 100);
 
 		npcs.tickPopulation(POPULATION.arrivalSeconds);

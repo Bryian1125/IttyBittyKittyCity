@@ -14,13 +14,14 @@ export type NodeSpec = {
 
 /**
  * The nine hand-gathering nodes: three per kind, placed within |x|, |z| ≤ 20
- * and at least two world units clear of every obstacle box in `layout.ts`.
+ * and at least two world units clear of every collection-point site in
+ * `layout.ts`.
  */
 export const NODE_SPECS: readonly NodeSpec[] = [
 	{
 		id: 'mineral-1',
 		kind: 'mineral',
-		position: { x: -8, z: -8 },
+		position: { x: -14, z: -14 },
 		label: 'Collect Raw Minerals',
 	},
 	{

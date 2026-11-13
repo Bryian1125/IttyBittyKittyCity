@@ -25,22 +25,26 @@ src/
   ui/                     Threlte components (declarative scene graph)
     MainMenu.svelte       Title screen, game start
     Player.svelte         Player mesh + per-frame task
-    Environment.svelte    Floor, walls, crates, lights
+    Environment.svelte    Floor, collection points, lights
     Placement.svelte      Build-mode ghost preview + click-to-place
     BuildingGhost.svelte  Green/red placement ghost for any building
     BuildingModel.svelte  Placed building: glTF model when the def has one, box otherwise
+    GltfProp.svelte       Static glTF prop (map deposits, scenery), scaled to a footprint
     BuildMenu.svelte      Bottom-right build button and building picker
     ResourceHud.svelte    Bottom-left resource and power counters
+    EconomyLayer.svelte   Collector → refinery packet animation
     FollowCamera.svelte   Camera rig + wheel zoom listener
   engine/                 Imperative systems (plain TypeScript)
     PlayerController.ts   Movement rules, delta-scaled, collision-aware
-    CollisionSystem.ts    AABB collision against layout and placed-building boxes
+    modelFit.ts           Clones and grounds a glTF prop at a target footprint
+    CollisionSystem.ts    AABB collision against collection points and placed buildings
     FollowCameraSystem.ts Tweened orbit camera around a follow focus
   lib/                    Pure data and helpers
     balance.ts            Resource, building, and buildable-area tunables
     cameraInput.ts        Q/E orbit-camera key bindings
+    economy.ts            Extraction, refining, and range math
     input.ts              Keyboard state reader (WASD bindings)
-    layout.ts             Floor and obstacle box specifications
+    layout.ts             Floor and collection-point site layout
     placement.ts          Grid math and placement validation
     power.ts              Power generation/demand satisfaction
     data/                 Save serialization and storage adapters
@@ -49,16 +53,18 @@ src/
     camera.svelte.ts      Orbit camera yaw
     resources.svelte.ts   Resource pools and spend checks
     buildings.svelte.ts   Placed buildings and placement selection
+    economy.svelte.ts     Ore buffers, refinery pulls, transfer packets
 ```
 
 ## Assets
 
 Third-party 3D assets live under `public/models/<pack>/` and are referenced by
 public URL from `BuildingDef.model` (for example
-`/models/kaykit/drill_structure.gltf`). Keep a pack's `.gltf`, `.bin`, texture
-files, and license text in the same folder so the relative texture URIs resolve
-and the license travels with the files. Provenance and attribution are recorded
-in [CREDITS.md](CREDITS.md).
+`/models/kaykit/drill_structure.gltf`) or `MapSite.deposit` (for example
+`/models/kenney-space-kit/rock_crystalsLargeA.glb`). Keep a pack's `.gltf`,
+`.bin`, texture files, and license text in the same folder so the relative
+texture URIs resolve and the license travels with the files. Provenance and
+attribution are recorded in [CREDITS.md](CREDITS.md).
 
 ## Boundaries reviewers enforce
 
