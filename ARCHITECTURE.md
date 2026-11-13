@@ -25,15 +25,22 @@ src/
   ui/                     Threlte components (declarative scene graph)
     Player.svelte         Player mesh + per-frame task
     Environment.svelte    Floor, walls, crates, lights
+    Placement.svelte      Build-mode ghost preview + click-to-place
+    BuildingToolbar.svelte Build picker, placement status, power readout
     FollowCamera.svelte   Camera rig + wheel zoom listener
   engine/                 Imperative systems (plain TypeScript)
     PlayerController.ts   Movement rules, delta-scaled, collision-aware
-    CollisionSystem.ts    AABB collision against layout boxes
+    CollisionSystem.ts    AABB collision against layout and placed-building boxes
     FollowCameraSystem.ts Camera smoothing, zoom clamping
   lib/                    Pure data and helpers
+    balance.ts            Resource, building, and buildable-area tunables
     input.ts              Keyboard state reader (WASD bindings)
     layout.ts             Floor and obstacle box specifications
+    placement.ts          Grid math and placement validation
+    power.ts              Power generation/demand satisfaction
   state/                  Cross-component reactive state (.svelte.ts modules)
+    resources.svelte.ts   Resource pools and spend checks
+    buildings.svelte.ts   Placed buildings and placement selection
 ```
 
 ## Boundaries reviewers enforce

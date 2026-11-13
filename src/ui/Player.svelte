@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import type { Mesh } from 'three';
-	import { camera } from '../state/camera.svelte';
-	import { CollisionSystem } from '../engine/CollisionSystem';
+	import type { CollisionSystem } from '../engine/CollisionSystem';
 	import { PlayerController } from '../engine/PlayerController';
 	import { readMovement } from '../lib/input';
+	import { camera } from '../state/camera.svelte';
 
-	let { object = $bindable() }: { object?: Mesh } = $props();
+	let { object = $bindable(), collision }: { object?: Mesh; collision: CollisionSystem } =
+		$props();
 
-	const collision = new CollisionSystem();
 	let controller: PlayerController | undefined;
 
 	useTask((delta) => {

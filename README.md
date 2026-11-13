@@ -58,25 +58,35 @@ src/
 ├── app.css                 # Global styles
 ├── engine/
 │   ├── PlayerController.ts # Movement logic with collision detection
-│   ├── CollisionSystem.ts  # AABB collision detection against obstacles
+│   ├── CollisionSystem.ts  # AABB collision detection against obstacles and placed buildings
 │   └── FollowCameraSystem.ts # Smooth camera following player
 ├── ui/
 │   ├── Player.svelte       # Kitty player mesh + controller binding
 │   ├── Environment.svelte  # Floor, obstacles, lighting
+│   ├── Placement.svelte    # Build-mode ghost preview + click-to-place
+│   ├── BuildingToolbar.svelte # Build picker, placement status, power readout
 │   └── FollowCamera.svelte # Camera that follows the player
+├── state/
+│   ├── resources.svelte.ts # Resource pools and spend checks
+│   └── buildings.svelte.ts # Placed buildings and placement selection
 └── lib/
+    ├── balance.ts          # Resource, building, and bounds tunables
+    ├── placement.ts        # Grid math and placement validation
+    ├── power.ts            # Power generation / demand satisfaction
     ├── layout.ts           # City layout (floor + obstacle positions)
     └── input.ts            # Keyboard input reading (WASD/Arrow keys)
 ```
 
 ## Controls
 
-| Key       | Action        |
-| --------- | ------------- |
-| `W` / `↑` | Move forward  |
-| `S` / `↓` | Move backward |
-| `A` / `←` | Move left     |
-| `D` / `→` | Move right    |
+| Key       | Action                       |
+| --------- | ---------------------------- |
+| `W` / `↑` | Move forward                 |
+| `S` / `↓` | Move backward                |
+| `A` / `←` | Move left                    |
+| `D` / `→` | Move right                   |
+| Click     | Place the selected structure |
+| `Esc`     | Cancel build mode            |
 
 ## Available Scripts
 
