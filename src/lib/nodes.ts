@@ -99,14 +99,16 @@ export type CollectPlan =
  * Collect decision for one kind: Food and H3 always land in their colony pools;
  * Raw Minerals ride the carried load and are rejected outright — yielding
  * nothing and starting no cooldown — while the load lacks room for the full
- * yield.
+ * yield. `yieldAmount` carries the equipped tool's modifier and defaults to
+ * the baseline gather.
  */
 export function planCollect(
 	kind: NodeKind,
 	carried: number,
 	capacity: number,
+	yieldAmount = COLLECTION.yieldPerCollect,
 ): CollectPlan {
-	const amount = COLLECTION.yieldPerCollect;
+	const amount = yieldAmount;
 
 	if (kind === 'h3') {
 		return { outcome: 'pool', resource: 'h3', amount, text: `+${amount} H3` };

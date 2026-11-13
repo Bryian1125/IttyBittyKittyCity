@@ -14,6 +14,7 @@ import {
 	type NodeView,
 } from './nodes.svelte';
 import { addResource, getResource, spendResource } from './resources.svelte';
+import { buyTool, equipTool } from './tools.svelte';
 
 /** Restores a known amount through the public API only. */
 function setResource(id: ResourceId, amount: number): void {
@@ -51,6 +52,7 @@ describe('resource nodes', () => {
 		for (const spec of NODE_SPECS) {
 			expect(viewOf(spec.id)).toEqual({
 				id: spec.id,
+				kind: spec.kind,
 				x: spec.position.x,
 				z: spec.position.z,
 				label: spec.label,
@@ -74,19 +76,23 @@ describe('resource nodes', () => {
 		expect(tryCollectNode(specOfKind('food').id)).toEqual({ text: '+3 Food' });
 		expect(getResource('food')).toBe(foodBefore + COLLECTION.yieldPerCollect);
 
-		expect(tryCollectNode(specOfKind('h3').id)).toEqual({ text: '+3 H3' });
-		expect(getResource('h3')).toBe(h3Before + COLLECTION.yieldPerCollect);
+		// H3 is gated behind the Handheld Drill (#18); with the starter
+		// pickaxe it is refused without touching the pool.
+		expect(tryCollectNode(specOfKind('h3').id)).toEqual({
+			text: 'Requires the Handheld Drill',
+		});
+		expect(getResource('h3')).toBe(h3Before);
 
 		expect(getCarried()).toBe(0);
 	});
 
 	it('blocks a second collect until the cooldown is ticked down', () => {
-		const spec = specOfKind('h3');
-		const before = getResource('h3');
+		const spec = specOfKind('food');
+		const before = getResource('food');
 		tryCollectNode(spec.id);
 
 		expect(tryCollectNode(spec.id)).toBeNull();
-		expect(getResource('h3')).toBe(before + COLLECTION.yieldPerCollect);
+		expect(getResource('food')).toBe(before + COLLECTION.yieldPerCollect);
 
 		tickNodes(COLLECTION.cooldownSeconds - 1);
 		expect(viewOf(spec.id).available).toBe(false);
@@ -94,8 +100,8 @@ describe('resource nodes', () => {
 
 		tickNodes(1);
 		expect(viewOf(spec.id).available).toBe(true);
-		expect(tryCollectNode(spec.id)).toEqual({ text: '+3 H3' });
-		expect(getResource('h3')).toBe(before + 2 * COLLECTION.yieldPerCollect);
+		expect(tryCollectNode(spec.id)).toEqual({ text: '+3 Food' });
+		expect(getResource('food')).toBe(before + 2 * COLLECTION.yieldPerCollect);
 	});
 
 	it('cools nodes down independently', () => {
@@ -133,5 +139,41 @@ describe('resource nodes', () => {
 		expect(getResource('food')).toBe(RESOURCES.food.starting);
 		expect(getResource('h3')).toBe(RESOURCES.h3.starting);
 		expect(nodeViews().every((view) => view.available)).toBe(true);
+	});
+
+	it('requires the drill for H3 and gathers it once equipped', () => {
+		equipTool('pickaxe');
+		const spec = specOfKind('h3');
+		const before = getResource('h3');
+
+		expect(tryCollectNode(spec.id)).toEqual({
+			text: 'Requires the Handheld Drill',
+		});
+		expect(getResource('h3')).toBe(before);
+		expect(viewOf(spec.id).available).toBe(true);
+
+		expect(buyTool('drill')).toBe(true);
+		expect(tryCollectNode(spec.id)).toEqual({
+			text: `+${2 * COLLECTION.yieldPerCollect} H3`,
+		});
+		expect(getResource('h3')).toBe(before + 2 * COLLECTION.yieldPerCollect);
+	});
+
+	it('doubles mineral yield and shortens the cooldown with the drill', () => {
+		expect(buyTool('drill')).toBe(true);
+		const spec = specOfKind('mineral');
+
+		expect(tryCollectNode(spec.id)).toEqual({
+			text: `+${2 * COLLECTION.yieldPerCollect} Raw Minerals`,
+		});
+		expect(getCarried()).toBe(2 * COLLECTION.yieldPerCollect);
+		expect(viewOf(spec.id).available).toBe(false);
+
+		tickNodes(8);
+		expect(viewOf(spec.id).available).toBe(false);
+
+		// Ready after 12s total; the pickaxe's 15s window would still be cooling.
+		tickNodes(4);
+		expect(viewOf(spec.id).available).toBe(true);
 	});
 });

@@ -4,13 +4,18 @@ import {
 	findNodeSpec,
 	NODE_SPECS,
 	planCollect,
+	type NodeKind,
 } from '../lib/nodes';
+import { toolForKind } from '../lib/tools';
 import { addCarried, getCarried, getCarryCapacity } from './carry.svelte';
 import { addResource } from './resources.svelte';
+import { getEquippedTool } from './tools.svelte';
 
 export type NodeView = {
 	/** Stable node id. */
 	id: string;
+	/** What the node yields; drives tool compatibility. */
+	kind: NodeKind;
 	/** World position on the ground plane. */
 	x: number;
 	z: number;
@@ -29,6 +34,7 @@ const cooldowns = $state<Record<string, number>>(
 export function nodeViews(): NodeView[] {
 	return NODE_SPECS.map((spec) => ({
 		id: spec.id,
+		kind: spec.kind,
 		x: spec.position.x,
 		z: spec.position.z,
 		label: spec.label,
@@ -37,15 +43,24 @@ export function nodeViews(): NodeView[] {
 }
 
 /**
- * Collects from the node when possible: Raw Minerals go to the carried load
- * (rejected with feedback while full), Food and H3 to their pools; starts the
- * cooldown. Returns feedback text, or null when nothing happened.
+ * Collects from the node when possible: the equipped tool must target the
+ * kind (mismatches are refused with feedback and start no cooldown), its
+ * yield and cooldown modifiers apply, Raw Minerals go to the carried load
+ * (rejected with feedback while full), Food and H3 to their pools. Returns
+ * feedback text, or null when nothing happened.
  */
 export function tryCollectNode(id: string): { text: string } | null {
 	const spec = findNodeSpec(id);
 	if (spec === undefined || cooldowns[id] > 0) return null;
 
-	const plan = planCollect(spec.kind, getCarried(), getCarryCapacity());
+	const tool = getEquippedTool();
+	if (!tool.targets.includes(spec.kind)) {
+		const required = toolForKind(spec.kind);
+		return { text: `Requires the ${required?.name ?? 'right tool'}` };
+	}
+
+	const amount = COLLECTION.yieldPerCollect * tool.yieldMultiplier;
+	const plan = planCollect(spec.kind, getCarried(), getCarryCapacity(), amount);
 	if (plan.outcome === 'rejected') return { text: plan.text };
 
 	if (plan.outcome === 'pool') {
@@ -54,7 +69,7 @@ export function tryCollectNode(id: string): { text: string } | null {
 		addCarried(plan.amount);
 	}
 
-	cooldowns[id] = COLLECTION.cooldownSeconds;
+	cooldowns[id] = COLLECTION.cooldownSeconds * tool.cooldownMultiplier;
 	return { text: plan.text };
 }
 

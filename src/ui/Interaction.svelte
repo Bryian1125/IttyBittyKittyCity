@@ -2,19 +2,21 @@
 	@component
 	World interaction: every frame it finds the nearest interactable within
 	reach — resource nodes (#5) and refinery input buffers (#6) — shows the [F]
-	prompt, and fires its action on an F press (the camera owns Q/E). Build
-	placement mode wins: a short hint replaces the prompt while a structure is
-	selected.
+	prompt, and fires its action on an F press (the camera owns Q/E). Digit
+	keys switch tools and the prompt names the equipped one. Build placement
+	mode wins: a short hint replaces the prompt while a structure is selected.
 -->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import type { Group } from 'three';
 	import { COLLECTION, DEPOSIT } from '../lib/balance';
 	import { pickNearest, type Interactable } from '../lib/interact';
+	import { TOOLS, toolForKind } from '../lib/tools';
 	import { buildingsState } from '../state/buildings.svelte';
 	import { getCarried, getCarryCapacity } from '../state/carry.svelte';
 	import { nodeViews, tryCollectNode } from '../state/nodes.svelte';
 	import { depositIntoRefinery, refineryViews } from '../state/refineries.svelte';
+	import { equipTool, getEquippedTool } from '../state/tools.svelte';
 
 	let { player }: { player?: Group } = $props();
 
@@ -33,13 +35,19 @@
 	function candidates(): Interactable[] {
 		const list: Interactable[] = [];
 
+		const tool = getEquippedTool();
+
 		for (const node of nodeViews()) {
+			const required = toolForKind(node.kind);
+			const canUse = tool.targets.includes(node.kind);
 			list.push({
 				id: `node:${node.id}`,
 				x: node.x,
 				z: node.z,
 				radius: COLLECTION.interactRadius,
-				label: node.label,
+				label: canUse
+					? `${node.label} · ${tool.name}`
+					: `${node.label} · requires ${required?.name ?? 'a tool'}`,
 				enabled: node.available,
 				act: () => {
 					const result = tryCollectNode(node.id);
@@ -93,7 +101,18 @@
 	});
 
 	function onKeydown(event: KeyboardEvent): void {
-		if (event.code !== 'KeyF' || event.repeat) return;
+		if (event.repeat) return;
+
+		const digit = /^Digit([1-9])$/.exec(event.code);
+		if (digit !== null) {
+			const tool = TOOLS[Number(digit[1]) - 1];
+			if (tool !== undefined && !equipTool(tool.id)) {
+				showToast(`${tool.name} not owned — buy it in the Build menu`);
+			}
+			return;
+		}
+
+		if (event.code !== 'KeyF') return;
 		if (buildingsState.selected !== undefined || nearest === undefined) return;
 
 		nearest.act();
