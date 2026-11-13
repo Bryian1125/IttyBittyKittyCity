@@ -1,9 +1,8 @@
-let yaw = $state(0);
-
-export function getCameraYaw(): number {
-	return yaw;
-}
+export const camera = $state({
+	yawTarget: 0,
+	yaw: 0,
+});
 
 export function rotateCamera(steps: number): void {
-	yaw += steps * (Math.PI / 2);
+	camera.yawTarget += steps * (Math.PI / 2);
 }
