@@ -23,7 +23,7 @@ describe('PlayerController', () => {
 		const target = new Object3D();
 		const controller = new PlayerController(target, new CollisionSystem([]), 5);
 
-		controller.update(0.1, { ...noInput, forward: true });
+		controller.update(0.1, { ...noInput, forward: true }, 0);
 
 		expect(target.position.z).toBeCloseTo(-0.5);
 		expect(target.position.x).toBe(0);
@@ -33,7 +33,7 @@ describe('PlayerController', () => {
 		const target = new Object3D();
 		const controller = new PlayerController(target, new CollisionSystem([]), 5);
 
-		controller.update(0.1, { ...noInput, forward: true, right: true });
+		controller.update(0.1, { ...noInput, forward: true, right: true }, 0);
 
 		expect(Math.hypot(target.position.x, target.position.z)).toBeCloseTo(0.5);
 	});
@@ -42,7 +42,7 @@ describe('PlayerController', () => {
 		const target = new Object3D();
 		const controller = new PlayerController(target, new CollisionSystem([]), 5);
 
-		controller.update(0.1, noInput);
+		controller.update(0.1, noInput, 0);
 
 		expect(target.position.x).toBe(0);
 		expect(target.position.z).toBe(0);
@@ -58,7 +58,7 @@ describe('PlayerController', () => {
 			5,
 		);
 
-		controller.update(0.1, { ...noInput, right: true });
+		controller.update(0.1, { ...noInput, right: true }, 0);
 
 		expect(target.position.x).toBeCloseTo(0.9);
 	});
