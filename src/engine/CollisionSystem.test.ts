@@ -31,4 +31,12 @@ describe('CollisionSystem', () => {
 		expect(system.intersects(new Vector3(0.99, 0.5, 0))).toBe(false);
 		expect(system.intersects(new Vector3(1, 0.5, 0))).toBe(true);
 	});
+
+	it('collides with boxes added at runtime', () => {
+		const system = new CollisionSystem([]);
+
+		system.addBox({ position: [0, 0.5, 0], size: [2, 2, 2] });
+
+		expect(system.intersects(new Vector3(0, 0.5, 0))).toBe(true);
+	});
 });
