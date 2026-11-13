@@ -1,29 +1,36 @@
-import { Matrix4, PerspectiveCamera, Quaternion, Vector3, type Camera } from 'three';
+import { PerspectiveCamera, Vector3, type Camera } from 'three';
 
-const OFFSET = new Vector3(0, 20, 16);
-const UP = new Vector3(0, 1, 0);
-const ORIGIN = new Vector3();
+export type CameraYawState = {
+	yawTarget: number;
+	yaw: number;
+};
+
+const OFFSET_HEIGHT = 20;
+const OFFSET_HORIZONTAL = 16;
 const FOLLOW_SPEED = 3.5;
 const FOV = 35;
+const QUARTER_TURN = Math.PI / 2;
+const TURN_SECONDS = 0.35;
 
 const ZOOM_MAX = 1; // current distance is the farthest the camera may get
 const ZOOM_MIN = 1 / 1.5; // 150% zoom in from current = closest allowed distance
 const ZOOM_SENSITIVITY = 0.0008;
 
-export interface CameraYawState {
-	yawTarget: number;
-	yaw: number;
-}
-
 export class FollowCameraSystem {
-	private readonly offsetDirection = new Vector3();
-	private readonly desiredOffset = new Vector3();
+	/** Invisible part the rig follows: always eases toward the player. */
+	private readonly focus = new Vector3();
 	private readonly desiredPosition = new Vector3();
-	private readonly lookMatrix = new Matrix4();
-	private readonly orientation = new Quaternion();
 	private zoomFactor = ZOOM_MAX;
+	private seeded = false;
 
-	constructor(private readonly yaw: CameraYawState) {}
+	private turnStart = 0;
+	private turnTarget: number;
+	private turnElapsed = 0;
+	private turnDuration = 0;
+
+	constructor(private readonly yaw: CameraYawState) {
+		this.turnTarget = yaw.yawTarget;
+	}
 
 	initialize(camera: Camera): void {
 		if (camera instanceof PerspectiveCamera) {
@@ -38,20 +45,49 @@ export class FollowCameraSystem {
 	}
 
 	update(delta: number, camera: Camera, target: Vector3): void {
-		// One continuously-eased yaw drives both tracks, so the turn is a
-		// single smooth glide with no window, freeze, or jump.
-		const smoothing = 1 - Math.exp(-FOLLOW_SPEED * delta);
-		this.yaw.yaw += (this.yaw.yawTarget - this.yaw.yaw) * smoothing;
+		// The focus is the only thing that eases, so following stays smooth
+		// while the camera stays rigidly attached to it.
+		if (!this.seeded) {
+			this.focus.copy(target);
+			this.seeded = true;
+		} else {
+			this.focus.lerp(target, 1 - Math.exp(-FOLLOW_SPEED * delta));
+		}
 
-		// Orientation is derived from the current yaw every frame: at rest it
-		// is constant, so plain movement can never angle the view.
-		this.offsetDirection.copy(OFFSET).applyAxisAngle(UP, this.yaw.yaw);
-		this.lookMatrix.lookAt(this.offsetDirection, ORIGIN, UP);
-		this.orientation.setFromRotationMatrix(this.lookMatrix);
-		camera.quaternion.copy(this.orientation);
+		this.updateTurn(delta);
 
-		this.desiredOffset.copy(this.offsetDirection).multiplyScalar(this.zoomFactor);
-		this.desiredPosition.copy(target).add(this.desiredOffset);
-		camera.position.lerp(this.desiredPosition, smoothing);
+		// The seat comes straight from the tweened yaw's sin/cos, and the aim
+		// is refreshed from the actual position every frame, so the player
+		// stays centred through the whole turn.
+		const radius = OFFSET_HORIZONTAL * this.zoomFactor;
+		this.desiredPosition.set(
+			this.focus.x + Math.sin(this.yaw.yaw) * radius,
+			this.focus.y + OFFSET_HEIGHT * this.zoomFactor,
+			this.focus.z + Math.cos(this.yaw.yaw) * radius,
+		);
+
+		camera.position.copy(this.desiredPosition);
+		camera.lookAt(this.focus);
+	}
+
+	private updateTurn(delta: number): void {
+		if (this.yaw.yawTarget !== this.turnTarget) {
+			this.turnStart = this.yaw.yaw;
+			this.turnTarget = this.yaw.yawTarget;
+			this.turnElapsed = 0;
+			this.turnDuration =
+				(TURN_SECONDS * Math.abs(this.turnTarget - this.turnStart)) /
+				QUARTER_TURN;
+		}
+
+		if (this.turnElapsed < this.turnDuration) {
+			this.turnElapsed = Math.min(this.turnDuration, this.turnElapsed + delta);
+			const progress = this.turnElapsed / this.turnDuration;
+			const eased = progress * progress * (3 - 2 * progress); // smoothstep
+			this.yaw.yaw =
+				this.turnStart + (this.turnTarget - this.turnStart) * eased;
+		} else if (this.yaw.yaw !== this.turnTarget) {
+			this.yaw.yaw = this.turnTarget;
+		}
 	}
 }
