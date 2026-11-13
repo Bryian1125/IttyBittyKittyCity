@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
-	import { floor, obstacles } from '../lib/layout';
+	import { floor, sites, type MapSiteType } from '../lib/layout';
+
+	const SITE_COLORS: Record<MapSiteType, string> = {
+		minerals: '#8a6d3f',
+		h3: '#4f9cae',
+		nuclear: '#5f9c58',
+	};
 </script>
 
 <T.Mesh position={floor.position}>
@@ -8,10 +14,11 @@
 	<T.MeshStandardMaterial color={floor.color} />
 </T.Mesh>
 
-{#each obstacles as obstacle (obstacle.id)}
-	<T.Mesh position={obstacle.position}>
-		<T.BoxGeometry args={obstacle.size} />
-		<T.MeshStandardMaterial color={obstacle.color} />
+{#each sites as site (site.id)}
+	<!-- TODO: placeholder mound — replace with proper deposit models (issue #13) -->
+	<T.Mesh position={site.position}>
+		<T.BoxGeometry args={site.size} />
+		<T.MeshStandardMaterial color={SITE_COLORS[site.type]} />
 	</T.Mesh>
 {/each}
 

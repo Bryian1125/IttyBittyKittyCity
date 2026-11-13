@@ -35,14 +35,18 @@ export function setPlacementCursor(cursor: Cell | undefined): void {
  * null when the selected structure can go at the anchor; otherwise why not.
  * Also null while no structure is selected.
  */
-export function getPlacementProblemAt(anchor: Cell): PlacementProblem | null {
+export function getPlacementProblemAt(
+	anchor: Cell,
+	playerCell?: Cell,
+): PlacementProblem | null {
 	const def = buildingsState.selected;
 	if (def === undefined) return null;
 
 	const problem = getPlacementProblem(
+		def,
 		anchor,
-		def.footprint,
 		buildingsState.placed,
+		playerCell,
 	);
 	if (problem !== null) return problem;
 
@@ -50,9 +54,13 @@ export function getPlacementProblemAt(anchor: Cell): PlacementProblem | null {
 }
 
 /** Charges the cost and commits the selected structure; null when blocked. */
-export function confirmPlacement(anchor: Cell): PlacedBuilding | null {
+export function confirmPlacement(
+	anchor: Cell,
+	playerCell?: Cell,
+): PlacedBuilding | null {
 	const def = buildingsState.selected;
-	if (def === undefined || getPlacementProblemAt(anchor) !== null) return null;
+	if (def === undefined || getPlacementProblemAt(anchor, playerCell) !== null)
+		return null;
 
 	for (const id of Object.keys(def.cost) as ResourceId[]) {
 		const amount = def.cost[id];

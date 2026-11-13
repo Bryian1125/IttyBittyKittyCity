@@ -58,26 +58,31 @@ src/
 ├── app.css                 # Global styles
 ├── engine/
 │   ├── PlayerController.ts # Movement logic with collision detection
-│   ├── CollisionSystem.ts  # AABB collision detection against obstacles and placed buildings
+│   ├── CollisionSystem.ts  # AABB collision detection against sites and placed buildings
 │   └── FollowCameraSystem.ts # Tweened orbit camera around a follow focus
 ├── ui/
 │   ├── MainMenu.svelte     # Wii/iisu styled title screen
 │   ├── Player.svelte       # Kitty player mesh + controller binding
-│   ├── Environment.svelte  # Floor, obstacles, lighting
+│   ├── Environment.svelte  # Floor, collection points, lighting
 │   ├── Placement.svelte    # Build-mode ghost preview + click-to-place
+│   ├── BuildingGhost.svelte # Green/red tinted placement ghost
+│   ├── BuildingModel.svelte # Placed building: glTF model or placeholder box
 │   ├── BuildMenu.svelte    # Bottom-right build button and building picker
 │   ├── ResourceHud.svelte  # Bottom-left resource and power counters
+│   ├── EconomyLayer.svelte # Animated collector → refinery ore packets
 │   └── FollowCamera.svelte # Camera that follows the player
 ├── state/
 │   ├── ui.svelte.ts        # Screen and game-start state
 │   ├── camera.svelte.ts    # Orbit camera yaw
 │   ├── resources.svelte.ts # Resource pools and spend checks
-│   └── buildings.svelte.ts # Placed buildings and placement selection
+│   ├── buildings.svelte.ts # Placed buildings and placement selection
+│   └── economy.svelte.ts   # Ore buffers, refinery pulls, transfer packets
 └── lib/
     ├── balance.ts          # Resource, building, and bounds tunables
     ├── placement.ts        # Grid math and placement validation
     ├── power.ts            # Power generation / demand satisfaction
-    ├── layout.ts           # City layout (floor + obstacle positions)
+    ├── economy.ts          # Extraction, refining, and range math
+    ├── layout.ts           # Floor and collection-point site layout
     ├── input.ts            # Keyboard input reading (WASD/Arrow keys)
     ├── cameraInput.ts      # Q/E orbit-camera key bindings
     └── data/               # Save-file serialization and storage adapters

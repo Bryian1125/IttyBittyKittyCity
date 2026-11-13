@@ -1,3 +1,5 @@
+import type { MapSiteType } from './layout';
+
 export type ResourceId = 'food' | 'rawMinerals' | 'materials' | 'h3';
 
 export type ResourceCost = Partial<Record<ResourceId, number>>;
@@ -25,6 +27,12 @@ export const RESOURCES: Record<ResourceId, ResourceConfig> = {
 export type BuildingCategory =
 	'housing' | 'factory' | 'processor' | 'power' | 'mining';
 
+export type RefineryRecipe = {
+	input: number;
+	output: number;
+	seconds: number;
+};
+
 export type BuildingDef = {
 	id: string;
 	name: string;
@@ -36,53 +44,157 @@ export type BuildingDef = {
 	unlock?: { minPopulation?: number };
 	/** Public path to a glTF model, e.g. `/models/kaykit/drill_structure.gltf`. */
 	model?: string;
+	/** Collection point the structure must be built on. */
+	site?: MapSiteType;
+	/** Extracted into a local buffer that refineries pull in. */
+	mines?: { ratePerMinute: number };
+	/** Fed straight into the colony pool. */
+	produces?: { resource: ResourceId; ratePerMinute: number };
+	/** Pulls buffered Raw Minerals within this cell radius and refines them. */
+	refines?: { rangeCells: number; recipe: RefineryRecipe };
 };
 
 /**
- * Placeholder content until the Models issues land. The registry shape is
- * frozen here: content issues add entries, nothing else changes.
+ * Placeholder roster until the Models issues land: tiered collectors, power
+ * sources, and refineries with rough numbers. The registry shape is frozen
+ * here: content issues add entries, nothing else changes.
  */
 export const BUILDINGS: BuildingDef[] = [
+	// Must sit on a minerals collection point; ore waits in a local buffer.
 	{
-		id: 'block-4x4',
-		name: 'Block 4×4',
-		category: 'housing',
-		footprint: [4, 4],
-		cost: { materials: 5 },
-		power: {},
-	},
-	{
-		id: 'block-2x4',
-		name: 'Block 2×4',
-		category: 'housing',
-		footprint: [2, 4],
-		cost: { materials: 4 },
-		power: {},
-	},
-	{
-		id: 'block-3x5',
-		name: 'Block 3×5',
-		category: 'factory',
-		footprint: [3, 5],
-		cost: { materials: 8 },
-		power: { draw: 5 },
-	},
-	{
-		id: 'power-block',
-		name: 'Power Block',
-		category: 'power',
+		id: 'mineral-collector-l1',
+		name: 'Mineral Collector L1',
+		category: 'mining',
 		footprint: [2, 2],
+		cost: { materials: 8 },
+		power: { draw: 2 },
+		site: 'minerals',
+		mines: { ratePerMinute: 12 },
+		model: '/models/kaykit/drill_structure.gltf',
+	},
+	{
+		id: 'mineral-collector-l2',
+		name: 'Mineral Collector L2',
+		category: 'mining',
+		footprint: [2, 2],
+		cost: { materials: 14 },
+		power: { draw: 4 },
+		site: 'minerals',
+		mines: { ratePerMinute: 18 },
+		model: '/models/kaykit/drill_structure.gltf',
+	},
+	{
+		id: 'mineral-collector-l3',
+		name: 'Mineral Collector L3',
+		category: 'mining',
+		footprint: [2, 2],
+		cost: { materials: 22 },
+		power: { draw: 6 },
+		site: 'minerals',
+		mines: { ratePerMinute: 27 },
+		model: '/models/kaykit/drill_structure.gltf',
+	},
+	// Must sit on an h3 collection point; feeds the H3 pool directly.
+	{
+		id: 'h3-extractor-l1',
+		name: 'H3 Extractor L1',
+		category: 'mining',
+		footprint: [2, 2],
+		cost: { materials: 12 },
+		power: { draw: 3 },
+		site: 'h3',
+		produces: { resource: 'h3', ratePerMinute: 2 },
+	},
+	{
+		id: 'h3-extractor-l2',
+		name: 'H3 Extractor L2',
+		category: 'mining',
+		footprint: [2, 2],
+		cost: { materials: 20 },
+		power: { draw: 5 },
+		site: 'h3',
+		produces: { resource: 'h3', ratePerMinute: 3 },
+	},
+	{
+		id: 'h3-extractor-l3',
+		name: 'H3 Extractor L3',
+		category: 'mining',
+		footprint: [2, 2],
+		cost: { materials: 30 },
+		power: { draw: 7 },
+		site: 'h3',
+		produces: { resource: 'h3', ratePerMinute: 5 },
+	},
+	// Pull buffered Raw Minerals from nearby collectors and refine them.
+	{
+		id: 'refinery-l1',
+		name: 'Refinery L1',
+		category: 'processor',
+		footprint: [3, 3],
+		cost: { materials: 10 },
+		power: { draw: 4 },
+		refines: { rangeCells: 6, recipe: { input: 3, output: 1, seconds: 8 } },
+	},
+	{
+		id: 'refinery-l2',
+		name: 'Refinery L2',
+		category: 'processor',
+		footprint: [3, 3],
+		cost: { materials: 18 },
+		power: { draw: 7 },
+		refines: { rangeCells: 9, recipe: { input: 3, output: 1, seconds: 6 } },
+	},
+	{
+		id: 'refinery-l3',
+		name: 'Refinery L3',
+		category: 'processor',
+		footprint: [3, 3],
+		cost: { materials: 28 },
+		power: { draw: 10 },
+		refines: { rangeCells: 12, recipe: { input: 3, output: 1, seconds: 4 } },
+	},
+	// Power: solar is cheap and weak; the nuclear plant is the payoff.
+	{
+		id: 'solar-panel-l1',
+		name: 'Solar Panel L1',
+		category: 'power',
+		footprint: [3, 2],
 		cost: { materials: 6 },
+		power: { generate: 4 },
+	},
+	{
+		id: 'solar-panel-l2',
+		name: 'Solar Panel L2',
+		category: 'power',
+		footprint: [3, 2],
+		cost: { materials: 10 },
 		power: { generate: 8 },
 	},
 	{
-		id: 'mining-drill',
-		name: 'Mining Drill',
-		category: 'mining',
-		footprint: [2, 2],
-		cost: {},
-		power: {},
-		model: '/models/kaykit/drill_structure.gltf',
+		id: 'solar-panel-l3',
+		name: 'Solar Panel L3',
+		category: 'power',
+		footprint: [3, 2],
+		cost: { materials: 16 },
+		power: { generate: 14 },
+	},
+	{
+		id: 'nuclear-plant-l1',
+		name: 'Nuclear Plant L1',
+		category: 'power',
+		footprint: [4, 4],
+		cost: { materials: 35 },
+		power: { generate: 60 },
+		site: 'nuclear',
+	},
+	{
+		id: 'nuclear-plant-l2',
+		name: 'Nuclear Plant L2',
+		category: 'power',
+		footprint: [4, 4],
+		cost: { materials: 55 },
+		power: { generate: 120 },
+		site: 'nuclear',
 	},
 ];
 
@@ -95,4 +207,10 @@ export const BUILD_BOUNDS = {
 	maxColumn: 29,
 	minRow: -29,
 	maxRow: 29,
+};
+
+/** Collector → refinery transfer tuning. */
+export const TRANSFER = {
+	seconds: 0.8,
+	refineryInputCapacity: 30,
 };
