@@ -30,10 +30,8 @@ src/
     BuildingGhost.svelte  Green/red placement ghost for any building
     BuildingModel.svelte  Placed building: glTF model when the def has one, box otherwise
     GltfProp.svelte       Static glTF prop (map deposits, scenery), scaled to a footprint
-    Nodes.svelte          Resource node visuals and depleted states
     Refineries.svelte     Refinery working-state visuals
     Colonists.svelte      Colonist NPC visuals
-    Interaction.svelte    [F] prompts, collection, deposits, tool switching
     BuildMenu.svelte      Bottom-right build button and building picker
     ResourceHud.svelte    Bottom-left resource and power counters
     EconomyLayer.svelte   Collector → refinery packet animation
@@ -51,27 +49,21 @@ src/
     cameraInput.ts        Q/E orbit-camera key bindings
     economy.ts            Extraction, refining, and range math
     input.ts              Keyboard state reader (WASD bindings)
-    interact.ts           Nearest-interactable picking
     layout.ts             Floor and collection-point site layout
-    nodes.ts              Node definitions and collection rules
     placement.ts          Grid math and placement validation
     population.ts         Colonist growth and upkeep rules
     power.ts              Power generation/demand satisfaction
     skins.ts              Skin presets and persistence
-    tools.ts              Tool definitions and targeting
     data/                 Save serialization and storage adapters
   state/                  Cross-component reactive state (.svelte.ts modules)
     ui.svelte.ts          Game start and overlay page state
     camera.svelte.ts      Orbit camera yaw
     resources.svelte.ts   Resource pools and spend checks
     buildings.svelte.ts   Placed buildings and placement selection
-    carry.svelte.ts       Carried Raw Minerals
     economy.svelte.ts     Ore buffers, refinery pulls, transfer packets
-    nodes.svelte.ts       Node stock, cooldowns, collection results
     npcs.svelte.ts        Colonists, population, and housing
-    refineries.svelte.ts  Refinery buffers and deposits
+    refineries.svelte.ts  Refinery buffers and status views
     skins.svelte.ts       Selected player skin
-    tools.svelte.ts       Owned and equipped tools
 ```
 
 ## Assets

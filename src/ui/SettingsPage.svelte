@@ -13,8 +13,6 @@
 		{ keys: 'W A S D', action: 'Move' },
 		{ keys: 'Q / E', action: 'Turn camera' },
 		{ keys: 'Mouse wheel', action: 'Zoom' },
-		{ keys: 'F', action: 'Collect / deposit' },
-		{ keys: '1 – 9', action: 'Equip tool' },
 		{ keys: 'R', action: 'Rotate structure while building' },
 		{ keys: 'Esc', action: 'Cancel / close' },
 	];

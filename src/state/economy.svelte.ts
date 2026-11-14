@@ -135,21 +135,3 @@ function hasPacketFrom(collectorId: number): boolean {
 export function getRefineryInput(buildingId: number): number {
 	return refineryInputs.get(buildingId) ?? 0;
 }
-
-/**
- * Player deposit into a refinery's input buffer, capacity-capped; returns how
- * much was accepted (the caller moves the same amount out of the carried load).
- */
-export function depositRefineryInput(
-	buildingId: number,
-	amount: number,
-): number {
-	const current = refineryInputs.get(buildingId) ?? 0;
-	const accepted = Math.min(
-		Math.max(amount, 0),
-		TRANSFER.refineryInputCapacity - current,
-	);
-	if (accepted <= 0) return 0;
-	refineryInputs.set(buildingId, current + accepted);
-	return accepted;
-}

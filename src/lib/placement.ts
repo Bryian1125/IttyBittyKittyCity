@@ -1,6 +1,5 @@
 import { BUILD_BOUNDS, BUILDING_HEIGHT, type BuildingDef } from './balance';
 import { sites } from './layout';
-import { NODE_SPECS } from './nodes';
 
 export type Cell = { column: number; row: number };
 
@@ -109,15 +108,6 @@ function rectContainsCell(rect: CellRect, cell: Cell): boolean {
 	);
 }
 
-// Resource nodes are landmarks: a building over one would bury it for good
-// (there is no demolition), so their cells are as occupied as the sites.
-const nodeFootprints = NODE_SPECS.map((node) =>
-	toFootprint({
-		position: [node.position.x, 0, node.position.z],
-		size: [1, 1, 1],
-	}),
-);
-
 const siteFootprints = sites.map((site) => ({
 	type: site.type,
 	rect: toFootprint(site),
@@ -148,9 +138,6 @@ export function getPlacementProblem(
 	}
 
 	if (playerCell !== undefined && rectContainsCell(rect, playerCell))
-		return 'occupied';
-
-	if (nodeFootprints.some((node) => rectsOverlap(rect, node)))
 		return 'occupied';
 
 	if (

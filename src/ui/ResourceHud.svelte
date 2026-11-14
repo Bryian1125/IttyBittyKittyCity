@@ -7,7 +7,6 @@
 	import { RESOURCES, type ResourceId } from '../lib/balance';
 	import { computePower } from '../lib/power';
 	import { buildingsState } from '../state/buildings.svelte';
-	import { getCarried, getCarryCapacity } from '../state/carry.svelte';
 	import { getHousingCapacity, getPopulation } from '../state/npcs.svelte';
 	import { getResource } from '../state/resources.svelte';
 	import { openPage } from '../state/ui.svelte';
@@ -36,11 +35,6 @@
 				<span class="amount">{getResource(id)}</span>
 			</div>
 		{/each}
-
-		<div class="box">
-			<span class="name">Carried</span>
-			<span class="amount">{getCarried()}/{getCarryCapacity()}</span>
-		</div>
 
 		<div class="box">
 			<span class="name">Colonists</span>

@@ -74,9 +74,16 @@ describe('resources', () => {
 	});
 
 	it('is exact for canAfford across mixed costs', () => {
-		expect(canAfford({ materials: 20, food: 5 })).toBe(true);
-		expect(canAfford({ materials: 21 })).toBe(false);
-		expect(canAfford({ food: 5, h3: 1 })).toBe(false);
+		expect(
+			canAfford({
+				materials: RESOURCES.materials.starting,
+				food: RESOURCES.food.starting,
+			}),
+		).toBe(true);
+		expect(canAfford({ materials: RESOURCES.materials.starting + 1 })).toBe(
+			false,
+		);
+		expect(canAfford({ food: RESOURCES.food.starting, h3: 1 })).toBe(false);
 		expect(canAfford({})).toBe(true);
 	});
 });

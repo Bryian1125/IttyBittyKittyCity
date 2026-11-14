@@ -119,4 +119,29 @@
 	<BuildingModel def={building.def} anchor={building.anchor} rotation={building.rotation} />
 {/each}
 
+{#if gameState.page === undefined && selected !== undefined}
+	<div class="prompt">Build mode — click to place, Esc to cancel</div>
+{/if}
+
 <svelte:window onpointermove={handlePointerMove} onclick={handleClick} onkeydown={handleKeydown} />
+
+<style>
+	.prompt {
+		position: fixed;
+		left: 50%;
+		bottom: 1.6rem;
+		transform: translateX(-50%);
+		padding: 0.55rem 1.15rem;
+		border: 1px solid rgba(178, 188, 202, 0.9);
+		border-radius: 999px;
+		color: #12151c;
+		font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+		font-weight: 700;
+		background: linear-gradient(180deg, #ffffff, #eef3fa);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.95),
+			0 8px 20px rgba(0, 0, 0, 0.35);
+		pointer-events: none;
+		white-space: nowrap;
+	}
+</style>

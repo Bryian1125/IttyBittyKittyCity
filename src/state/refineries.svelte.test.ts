@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BUILDINGS, TRANSFER, type BuildingDef } from '../lib/balance';
 import { buildingsState } from './buildings.svelte';
-import { addCarried, getCarried, takeCarried } from './carry.svelte';
-import { getRefineryInput } from './economy.svelte';
-import { depositIntoRefinery, refineryViews } from './refineries.svelte';
+import { getRefineryInput, tickEconomy } from './economy.svelte';
+import { refineryViews } from './refineries.svelte';
 
 function getDef(id: string): BuildingDef {
 	const def = BUILDINGS.find((building) => building.id === id);
@@ -29,7 +28,6 @@ function placeDef(defId: string, column = 0, row = 0): number {
 describe('refinery facade', () => {
 	beforeEach(() => {
 		buildingsState.placed.length = 0;
-		takeCarried(getCarried());
 	});
 
 	it('exposes one view per placed refinery with its centre and capacity', () => {
@@ -54,60 +52,25 @@ describe('refinery facade', () => {
 		expect(refineryViews()).toEqual([]);
 	});
 
-	it('deposits up to the carried amount and empties the load', () => {
+	it('stays starved while the grid has no power', () => {
 		const id = placeDef('refinery-l1');
-		addCarried(5);
+		placeDef('mineral-collector-l1', 3, 0);
 
-		expect(depositIntoRefinery(id, 99)).toBe(5);
-		expect(getCarried()).toBe(0);
-		expect(getRefineryInput(id)).toBe(5);
-	});
+		tickEconomy(60);
 
-	it('stops accepting once the buffer is full and leaves the load carried', () => {
-		const id = placeDef('refinery-l1');
-
-		// Carry capacity (10) is far below the buffer (30), so fill in trips.
-		for (let trip = 0; trip < 3; trip += 1) {
-			addCarried(10);
-			expect(depositIntoRefinery(id, 10)).toBe(10);
-		}
-		expect(getRefineryInput(id)).toBe(TRANSFER.refineryInputCapacity);
-
-		addCarried(10);
-		expect(depositIntoRefinery(id, 10)).toBe(0);
-		expect(getCarried()).toBe(10);
-	});
-
-	it('returns 0 for unknown ids and non-refinery buildings', () => {
-		const solar = placeDef('solar-panel-l1');
-		addCarried(4);
-
-		expect(depositIntoRefinery(solar, 4)).toBe(0);
-		expect(depositIntoRefinery(999_999, 4)).toBe(0);
-		expect(getCarried()).toBe(4);
-	});
-
-	it('reports starved, low-power, and working as input and power change', () => {
-		const id = placeDef('refinery-l1');
+		expect(getRefineryInput(id)).toBe(0);
 		expect(refineryViews()[0]?.status).toBe('starved');
+	});
 
-		addCarried(3);
-		depositIntoRefinery(id, 3);
+	it('reaches the working status once powered and fed by the suction loop', () => {
+		const id = placeDef('refinery-l1');
+		placeDef('mineral-collector-l1', 3, 0);
+		placeDef('solar-panel-l3', 6, 6);
 
-		// Fed, but the refinery (draw 4) has no generation: low power.
-		expect(refineryViews()[0]?.status).toBe('low-power');
+		// 20 simulated seconds: the collector buffers and the refinery pulls.
+		for (let step = 0; step < 200; step += 1) tickEconomy(0.1);
 
-		placeDef('solar-panel-l3');
+		expect(getRefineryInput(id)).toBeGreaterThanOrEqual(3);
 		expect(refineryViews()[0]?.status).toBe('working');
-	});
-
-	it('keeps a below-batch refinery starved even at full power', () => {
-		const id = placeDef('refinery-l1');
-		placeDef('solar-panel-l3');
-
-		addCarried(2);
-		depositIntoRefinery(id, 2);
-
-		expect(refineryViews()[0]?.status).toBe('starved');
 	});
 });

@@ -8,8 +8,6 @@
 	import EconomyLayer from './ui/EconomyLayer.svelte';
 	import Environment from './ui/Environment.svelte';
 	import FollowCamera from './ui/FollowCamera.svelte';
-	import Interaction from './ui/Interaction.svelte';
-	import Nodes from './ui/Nodes.svelte';
 	import Placement from './ui/Placement.svelte';
 	import Player from './ui/Player.svelte';
 	import Refineries from './ui/Refineries.svelte';
@@ -31,14 +29,12 @@
 				<FollowCamera target={player} />
 			{/if}
 			<Placement {collision} {player} />
-			<Nodes />
 			<Refineries />
 			<Colonists />
 			<EconomyLayer />
 		</Canvas>
 		<BuildMenu />
 		<ResourceHud />
-		<Interaction {player} />
 	{:else}
 		<MainMenu />
 	{/if}

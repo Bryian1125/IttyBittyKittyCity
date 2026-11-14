@@ -5,16 +5,15 @@
 -->
 <script lang="ts">
 	import { RESOURCES, type ResourceId } from '../lib/balance';
-	import { getCarried } from '../state/carry.svelte';
 	import { getStoredRawMinerals } from '../state/economy.svelte';
 	import { getResource } from '../state/resources.svelte';
 	import PageShell from './PageShell.svelte';
 
 	const ids = Object.keys(RESOURCES) as ResourceId[];
 
-	/** Raw Minerals are physical: the amount is everything carried or stored. */
+	/** Raw Minerals are physical: the amount is everything stored in machines. */
 	function liveAmount(id: ResourceId): number {
-		if (id === 'rawMinerals') return getCarried() + getStoredRawMinerals();
+		if (id === 'rawMinerals') return getStoredRawMinerals();
 		return getResource(id);
 	}
 </script>

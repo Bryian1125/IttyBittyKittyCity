@@ -7,11 +7,9 @@
 -->
 <script lang="ts">
 	import { BUILDINGS, RESOURCES, type ResourceCost, type ResourceId } from '../lib/balance';
-	import { TOOLS } from '../lib/tools';
 	import { buildingsState, startPlacing } from '../state/buildings.svelte';
 	import { isUnlocked } from '../state/npcs.svelte';
 	import { canAfford } from '../state/resources.svelte';
-	import { buyTool, equipTool, getEquippedTool, isToolOwned } from '../state/tools.svelte';
 
 	let open = $state(false);
 
@@ -27,26 +25,6 @@
 <div class="build-menu">
 	{#if open}
 		<div class="panel">
-			<span class="section">Tools</span>
-			{#each TOOLS as tool (tool.id)}
-				{@const owned = isToolOwned(tool.id)}
-				{@const equipped = getEquippedTool().id === tool.id}
-				<button
-					type="button"
-					class="option"
-					data-affordable={owned || canAfford({ materials: tool.cost })}
-					data-selected={equipped}
-					disabled={!owned && !canAfford({ materials: tool.cost })}
-					onclick={() => (owned ? equipTool(tool.id) : buyTool(tool.id))}
-				>
-					{tool.name}
-					<span class="cost"
-						>{owned ? (equipped ? 'Equipped' : 'Owned') : `${tool.cost} Materials`}</span
-					>
-				</button>
-			{/each}
-
-			<span class="section">Buildings</span>
 			{#each BUILDINGS as def (def.id)}
 				<button
 					type="button"
@@ -101,15 +79,6 @@
 		box-shadow:
 			inset 0 1px 0 rgba(255, 255, 255, 0.95),
 			0 10px 26px rgba(0, 0, 0, 0.35);
-
-		& .section {
-			padding: 0 0.2rem;
-			font-size: 0.7rem;
-			font-weight: 700;
-			letter-spacing: 0.05em;
-			text-transform: uppercase;
-			color: #5a6472;
-		}
 
 		& .option {
 			display: flex;

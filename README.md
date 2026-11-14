@@ -69,10 +69,8 @@ src/
 │   ├── BuildingGhost.svelte # Green/red tinted placement ghost
 │   ├── BuildingModel.svelte # Placed building: glTF model or placeholder box
 │   ├── GltfProp.svelte     # Static glTF props (deposits, scenery)
-│   ├── Nodes.svelte        # Resource node visuals and depleted states
 │   ├── Refineries.svelte   # Refinery working-state visuals
 │   ├── Colonists.svelte    # Colonist NPC visuals
-│   ├── Interaction.svelte  # [F] prompts, collection, deposits, tools
 │   ├── BuildMenu.svelte    # Bottom-right build button and building picker
 │   ├── ResourceHud.svelte  # Bottom-left counters and page buttons
 │   ├── EconomyLayer.svelte # Animated collector → refinery ore packets
@@ -86,10 +84,7 @@ src/
 │   ├── resources.svelte.ts # Resource pools and spend checks
 │   ├── buildings.svelte.ts # Placed buildings and placement selection
 │   ├── economy.svelte.ts   # Ore buffers, refinery pulls, transfer packets
-│   ├── nodes.svelte.ts     # Node stock, cooldowns, collection results
 │   ├── refineries.svelte.ts # Refinery buffers and deposits
-│   ├── carry.svelte.ts     # Carried Raw Minerals
-│   ├── tools.svelte.ts     # Owned and equipped tools
 │   ├── npcs.svelte.ts      # Colonists, population, and housing
 │   └── skins.svelte.ts     # Selected player skin
 └── lib/
@@ -97,9 +92,6 @@ src/
     ├── placement.ts        # Grid math and placement validation
     ├── power.ts            # Power generation / demand satisfaction
     ├── economy.ts          # Extraction, refining, and range math
-    ├── nodes.ts            # Node definitions and collection rules
-    ├── interact.ts         # Nearest-interactable picking
-    ├── tools.ts            # Tool definitions and targeting
     ├── population.ts       # Colonist growth and upkeep rules
     ├── skins.ts            # Skin presets and persistence
     ├── layout.ts           # Floor and collection-point site layout
@@ -118,8 +110,6 @@ src/
 | `D` / `→` | Move right                      |
 | `Q` / `E` | Turn camera                     |
 | Wheel     | Zoom                            |
-| `F`       | Collect / deposit               |
-| `1` – `9` | Equip tool                      |
 | `R`       | Rotate structure while building |
 | Click     | Place the selected structure    |
 | `Esc`     | Cancel build mode               |

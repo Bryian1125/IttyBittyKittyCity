@@ -17,19 +17,20 @@ export type ResourceConfig = {
 /**
  * Single source of truth for the colony's resources. Adding a resource means
  * adding a ResourceId member and one entry here.
- * Starting Materials seed the first buildings, Food the first colonist.
+ * Starting Materials cover the first H3 Extractor, Mineral Collector, and
+ * Refinery; Food keeps the first colonist fed.
  */
 export const RESOURCES: Record<ResourceId, ResourceConfig> = {
 	food: {
 		label: 'Food',
-		hint: 'Collected from food sources — colonists eat it over time.',
+		hint: 'Colonists eat it over time; no food production is built yet.',
 		starting: 5,
 		cap: 999,
 		hud: true,
 	},
 	rawMinerals: {
 		label: 'Raw Minerals',
-		hint: 'Mined from crystal deposits by hand or by Mineral Collectors, then refined.',
+		hint: 'Mined by Mineral Collectors from crystal deposits, then refined.',
 		starting: 0,
 		cap: 999,
 		hud: false,
@@ -37,7 +38,7 @@ export const RESOURCES: Record<ResourceId, ResourceConfig> = {
 	materials: {
 		label: 'Materials',
 		hint: 'Refined from Raw Minerals at a Refinery; everything is built from it.',
-		starting: 20,
+		starting: 30,
 		cap: 999,
 		hud: true,
 	},
@@ -252,23 +253,6 @@ export const BUILD_BOUNDS = {
 export const TRANSFER = {
 	seconds: 0.8,
 	refineryInputCapacity: 30,
-};
-
-/** Walk-up interaction tuning for resource nodes. */
-export const COLLECTION = {
-	interactRadius: 1.5,
-	yieldPerCollect: 3,
-	cooldownSeconds: 15,
-};
-
-/** How much Raw Minerals the player can haul at once. */
-export const CARRY = {
-	capacity: 10,
-};
-
-/** Walk-up radius at a refinery's centre for depositing carried ore. */
-export const DEPOSIT = {
-	interactRadius: 3.5,
 };
 
 /** Colonist arrival and upkeep tuning. */
