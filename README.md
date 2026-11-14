@@ -54,12 +54,13 @@ npm run preview
 ```
 src/
 ├── main.ts                 # App entry point
-├── App.svelte              # Root component – menu, canvas, and HUD wiring
+├── App.svelte              # Root component – menu, canvas, HUD, overlay pages
 ├── app.css                 # Global styles
 ├── engine/
 │   ├── PlayerController.ts # Movement logic with collision detection
 │   ├── CollisionSystem.ts  # AABB collision detection against sites and placed buildings
-│   └── FollowCameraSystem.ts # Tweened orbit camera around a follow focus
+│   ├── FollowCameraSystem.ts # Tweened orbit camera around a follow focus
+│   └── modelFit.ts         # Fits glTF props to a target footprint
 ├── ui/
 │   ├── MainMenu.svelte     # Wii/iisu styled title screen
 │   ├── Player.svelte       # Kitty player mesh + controller binding
@@ -67,37 +68,61 @@ src/
 │   ├── Placement.svelte    # Build-mode ghost preview + click-to-place
 │   ├── BuildingGhost.svelte # Green/red tinted placement ghost
 │   ├── BuildingModel.svelte # Placed building: glTF model or placeholder box
+│   ├── GltfProp.svelte     # Static glTF props (deposits, scenery)
+│   ├── Nodes.svelte        # Resource node visuals and depleted states
+│   ├── Refineries.svelte   # Refinery working-state visuals
+│   ├── Colonists.svelte    # Colonist NPC visuals
+│   ├── Interaction.svelte  # [F] prompts, collection, deposits, tools
 │   ├── BuildMenu.svelte    # Bottom-right build button and building picker
-│   ├── ResourceHud.svelte  # Bottom-left resource and power counters
+│   ├── ResourceHud.svelte  # Bottom-left counters and page buttons
 │   ├── EconomyLayer.svelte # Animated collector → refinery ore packets
+│   ├── PageShell.svelte    # Overlay page frame (backdrop, card, close)
+│   ├── ResourcesPage.svelte # Resource cards with live amounts
+│   ├── SettingsPage.svelte # Skin picker and controls reference
 │   └── FollowCamera.svelte # Camera that follows the player
 ├── state/
-│   ├── ui.svelte.ts        # Screen and game-start state
+│   ├── ui.svelte.ts        # Game start and overlay page state
 │   ├── camera.svelte.ts    # Orbit camera yaw
 │   ├── resources.svelte.ts # Resource pools and spend checks
 │   ├── buildings.svelte.ts # Placed buildings and placement selection
-│   └── economy.svelte.ts   # Ore buffers, refinery pulls, transfer packets
+│   ├── economy.svelte.ts   # Ore buffers, refinery pulls, transfer packets
+│   ├── nodes.svelte.ts     # Node stock, cooldowns, collection results
+│   ├── refineries.svelte.ts # Refinery buffers and deposits
+│   ├── carry.svelte.ts     # Carried Raw Minerals
+│   ├── tools.svelte.ts     # Owned and equipped tools
+│   ├── npcs.svelte.ts      # Colonists, population, and housing
+│   └── skins.svelte.ts     # Selected player skin
 └── lib/
-    ├── balance.ts          # Resource, building, and bounds tunables
+    ├── balance.ts          # Resource, building, and tuning tables
     ├── placement.ts        # Grid math and placement validation
     ├── power.ts            # Power generation / demand satisfaction
     ├── economy.ts          # Extraction, refining, and range math
+    ├── nodes.ts            # Node definitions and collection rules
+    ├── interact.ts         # Nearest-interactable picking
+    ├── tools.ts            # Tool definitions and targeting
+    ├── population.ts       # Colonist growth and upkeep rules
+    ├── skins.ts            # Skin presets and persistence
     ├── layout.ts           # Floor and collection-point site layout
-    ├── input.ts            # Keyboard input reading (WASD/Arrow keys)
+    ├── input.ts            # Keyboard input reading (WASD)
     ├── cameraInput.ts      # Q/E orbit-camera key bindings
     └── data/               # Save-file serialization and storage adapters
 ```
 
 ## Controls
 
-| Key       | Action                       |
-| --------- | ---------------------------- |
-| `W` / `↑` | Move forward                 |
-| `S` / `↓` | Move backward                |
-| `A` / `←` | Move left                    |
-| `D` / `→` | Move right                   |
-| Click     | Place the selected structure |
-| `Esc`     | Cancel build mode            |
+| Key       | Action                          |
+| --------- | ------------------------------- |
+| `W` / `↑` | Move forward                    |
+| `S` / `↓` | Move backward                   |
+| `A` / `←` | Move left                       |
+| `D` / `→` | Move right                      |
+| `Q` / `E` | Turn camera                     |
+| Wheel     | Zoom                            |
+| `F`       | Collect / deposit               |
+| `1` – `9` | Equip tool                      |
+| `R`       | Rotate structure while building |
+| Click     | Place the selected structure    |
+| `Esc`     | Cancel build mode               |
 
 ## Available Scripts
 

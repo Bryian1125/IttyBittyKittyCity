@@ -4,8 +4,7 @@
 	be swapped (issue #4). The model faces -z, matching the initial camera view
 	and the W key's forward direction. Movement and collision are unchanged —
 	the controller moves the group and the collision system keeps its 1×1×1
-	footprint around the group's position. Press C to cycle skins until the
-	Settings page (#12) lands.
+	footprint around the group's position. The skin is chosen in Settings.
 -->
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
@@ -13,9 +12,10 @@
 	import type { CollisionSystem } from '../engine/CollisionSystem';
 	import { PlayerController } from '../engine/PlayerController';
 	import { readMovement } from '../lib/input';
-	import { SKINS, skinColor } from '../lib/skins';
+	import { skinColor } from '../lib/skins';
 	import { camera } from '../state/camera.svelte';
-	import { getSkin, setSkin } from '../state/skins.svelte';
+	import { getSkin } from '../state/skins.svelte';
+	import { gameState } from '../state/ui.svelte';
 
 	let { object = $bindable(), collision }: { object?: Group; collision: CollisionSystem } =
 		$props();
@@ -24,20 +24,9 @@
 	let controller: PlayerController | undefined;
 
 	useTask((delta) => {
-		if (object === undefined) return;
+		if (object === undefined || gameState.page !== undefined) return;
 		controller ??= new PlayerController(object, collision);
 		controller.update(delta, readMovement(), camera.yaw);
-	});
-
-	// Temporary dev control until the Settings page (#12) consumes `setSkin`.
-	$effect(() => {
-		const onKey = (event: KeyboardEvent): void => {
-			if (event.code !== 'KeyC' || event.repeat) return;
-			const ids = SKINS.map((entry) => entry.id);
-			setSkin(ids[(ids.indexOf(getSkin()) + 1) % ids.length]);
-		};
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
 	});
 </script>
 

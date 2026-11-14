@@ -14,6 +14,8 @@
 	import Player from './ui/Player.svelte';
 	import Refineries from './ui/Refineries.svelte';
 	import ResourceHud from './ui/ResourceHud.svelte';
+	import ResourcesPage from './ui/ResourcesPage.svelte';
+	import SettingsPage from './ui/SettingsPage.svelte';
 	import { gameState } from './state/ui.svelte';
 
 	let player = $state<Group | undefined>(undefined);
@@ -39,5 +41,11 @@
 		<Interaction {player} />
 	{:else}
 		<MainMenu />
+	{/if}
+
+	{#if gameState.page === 'resources'}
+		<ResourcesPage />
+	{:else if gameState.page === 'settings'}
+		<SettingsPage />
 	{/if}
 </main>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { startGame } from '../state/ui.svelte';
+	import { openPage, startGame } from '../state/ui.svelte';
 </script>
 
 <div class="menu">
@@ -10,6 +10,10 @@
 	<div class="channels">
 		<button type="button" class="channel" onclick={startGame}>
 			<span class="channel-label">Start Game</span>
+		</button>
+
+		<button type="button" class="channel" onclick={() => openPage('settings')}>
+			<span class="channel-label">Settings</span>
 		</button>
 
 		<button type="button" class="channel">

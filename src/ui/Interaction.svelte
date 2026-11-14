@@ -4,7 +4,8 @@
 	reach — resource nodes (#5) and refinery input buffers (#6) — shows the [F]
 	prompt, and fires its action on an F press (the camera owns Q/E). Digit
 	keys switch tools and the prompt names the equipped one. Build placement
-	mode wins: a short hint replaces the prompt while a structure is selected.
+	mode wins: a short hint replaces the prompt while a structure is selected;
+	overlay pages hide the prompt and swallow interaction keys.
 -->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
@@ -17,6 +18,7 @@
 	import { nodeViews, tryCollectNode } from '../state/nodes.svelte';
 	import { depositIntoRefinery, refineryViews } from '../state/refineries.svelte';
 	import { equipTool, getEquippedTool } from '../state/tools.svelte';
+	import { gameState } from '../state/ui.svelte';
 
 	let { player }: { player?: Group } = $props();
 
@@ -75,7 +77,7 @@
 	}
 
 	function refresh(): void {
-		if (buildingsState.selected !== undefined || player === undefined) {
+		if (gameState.page !== undefined || buildingsState.selected !== undefined || player === undefined) {
 			nearest = undefined;
 			return;
 		}
@@ -101,7 +103,7 @@
 	});
 
 	function onKeydown(event: KeyboardEvent): void {
-		if (event.repeat) return;
+		if (event.repeat || gameState.page !== undefined) return;
 
 		const digit = /^Digit([1-9])$/.exec(event.code);
 		if (digit !== null) {
@@ -122,10 +124,12 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-{#if buildingsState.selected !== undefined}
-	<div class="prompt">Build mode — click to place, Esc to cancel</div>
-{:else if nearest !== undefined}
-	<div class="prompt">[F] {nearest.label}</div>
+{#if gameState.page === undefined}
+	{#if buildingsState.selected !== undefined}
+		<div class="prompt">Build mode — click to place, Esc to cancel</div>
+	{:else if nearest !== undefined}
+		<div class="prompt">[F] {nearest.label}</div>
+	{/if}
 {/if}
 {#if toast !== undefined}
 	<div class="toast" role="status">{toast}</div>

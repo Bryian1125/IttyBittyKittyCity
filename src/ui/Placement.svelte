@@ -18,6 +18,7 @@
 		setPlacementCursor,
 		stopPlacing,
 	} from '../state/buildings.svelte';
+	import { gameState } from '../state/ui.svelte';
 	import BuildingGhost from './BuildingGhost.svelte';
 	import BuildingModel from './BuildingModel.svelte';
 
@@ -57,7 +58,8 @@
 	}
 
 	function handlePointerMove(event: PointerEvent): void {
-		if (!isCanvasEvent(event) || buildingsState.selected === undefined) return;
+		if (!isCanvasEvent(event) || buildingsState.selected === undefined || gameState.page !== undefined)
+			return;
 
 		const canvasRect = renderer.domElement.getBoundingClientRect();
 		pointerNdc.set(
@@ -73,7 +75,7 @@
 
 	function handleClick(event: MouseEvent): void {
 		const anchor = cursor;
-		if (!isCanvasEvent(event) || anchor === undefined) return;
+		if (!isCanvasEvent(event) || anchor === undefined || gameState.page !== undefined) return;
 
 		const placed = confirmPlacement(anchor, playerCell);
 		if (placed === null) return;
@@ -86,6 +88,8 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent): void {
+		if (gameState.page !== undefined) return;
+
 		if (event.key === 'Escape') stopPlacing();
 
 		// Physical key, like the movement and camera bindings: R must not depend

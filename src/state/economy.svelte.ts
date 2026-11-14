@@ -25,6 +25,14 @@ export const transferPackets = $state<TransferPacket[]>([]);
 
 let nextPacketId = 1;
 
+/** Raw Minerals sitting in collector buffers and refinery intakes. */
+export function getStoredRawMinerals(): number {
+	let stored = 0;
+	for (const buffered of buffers.values()) stored += buffered;
+	for (const intake of refineryInputs.values()) stored += intake;
+	return stored;
+}
+
 /** Per-frame economy: extraction, refinery pulling, and conversion. */
 export function tickEconomy(delta: number): void {
 	// Machines run at the grid's satisfaction ratio; transports keep their own
