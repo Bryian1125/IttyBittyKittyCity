@@ -23,7 +23,7 @@ export type ResourceConfig = {
 export const RESOURCES: Record<ResourceId, ResourceConfig> = {
 	food: {
 		label: 'Food',
-		hint: 'Colonists eat it over time; no food production is built yet.',
+		hint: 'Grown by Farms; colonists eat it over time.',
 		starting: 5,
 		cap: 999,
 		hud: true,
@@ -163,6 +163,34 @@ export const BUILDINGS: BuildingDef[] = [
 		power: { draw: 7 },
 		site: 'h3',
 		produces: { resource: 'h3', ratePerMinute: 5 },
+	},
+	// Grow food straight into the pool; no collection point needed.
+	{
+		id: 'farm-l1',
+		name: 'Farm L1',
+		category: 'factory',
+		footprint: [3, 3],
+		cost: { materials: 8 },
+		power: { draw: 2 },
+		produces: { resource: 'food', ratePerMinute: 4 },
+	},
+	{
+		id: 'farm-l2',
+		name: 'Farm L2',
+		category: 'factory',
+		footprint: [3, 3],
+		cost: { materials: 14 },
+		power: { draw: 4 },
+		produces: { resource: 'food', ratePerMinute: 7 },
+	},
+	{
+		id: 'farm-l3',
+		name: 'Farm L3',
+		category: 'factory',
+		footprint: [3, 3],
+		cost: { materials: 22 },
+		power: { draw: 6 },
+		produces: { resource: 'food', ratePerMinute: 11 },
 	},
 	// Pull buffered Raw Minerals from nearby collectors and refine them.
 	{
